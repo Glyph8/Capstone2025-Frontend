@@ -46,6 +46,7 @@ export interface addTimeRequest {
 export interface LoadTableState {
     loadTable: Event[];
     setLoadTable: (newTable: Event[]) => void;
+    addNewLoadTable: (newTable: Event) => void;
 }
 
 export interface Preset {
