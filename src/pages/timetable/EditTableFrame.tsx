@@ -7,7 +7,7 @@ import { useSelectCellStore, usePresetStore } from "../../store/store";
 // import { sendEventRequest } from "../../apis/timetable";
 import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
-import { sendDummyEventRequest, sendEventRequest } from "../../apis/timetable";
+import { sendDummyEventRequest } from "../../apis/timetable";
 import type { selectedTime, addTimeRequest } from "../../types/types";
 import { useState } from "react";
 
