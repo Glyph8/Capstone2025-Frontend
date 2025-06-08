@@ -9,6 +9,8 @@ import TimeTablePage from "../pages/timetable/TimeTablePage.tsx";
 import CalenderPage from "../pages/calender/CalenderPage.tsx";
 import ReviewPage from "../pages/review/ReviewPage.tsx";
 import MyPage from "../pages/mypage/MyPage.tsx";
+import SetInterestPage from "../pages/auth/SetInterestPage.tsx";
+import SetAcademicInfoPage from "../pages/auth/SetAcademicInfoPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -32,6 +34,14 @@ const router = createBrowserRouter([
             {
                 path: 'signup',
                 element: <SignupPage />
+            },
+            {
+                path: 'interest',
+                element: <SetInterestPage />
+            },
+            {
+                path: 'academic-info',
+                element: <SetAcademicInfoPage />
             },
         ]
     },

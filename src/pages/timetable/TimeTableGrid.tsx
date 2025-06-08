@@ -99,9 +99,8 @@ const TimeTableGrid = () => {
 
     return (
         <div
-            className="grid" // 🌟 변경: position: relative 제거, 더 깔끔한 그리드 로직
+            className="grid" 
             style={{
-                // 🌟 변경: 시간 라벨 컬럼이 없어졌으므로 7개의 컬럼만 정의
                 gridTemplateColumns: 'repeat(7, 1fr)',
                 // 30분 단위로 28개의 행을 생성
                 gridTemplateRows: `repeat(${TIME_SLOTS.length}, 50px)`,

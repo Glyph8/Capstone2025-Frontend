@@ -1,6 +1,13 @@
 
-export type dayString = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
+export interface AcademicInfo{
+  academicStatus: "ENROLLED" | "LEAVE_OF_ABSENCE" |  "GRADUATED",
+  grade: number,
+  college: string,
+  department: string,
+  name: string
+}
 
+export type dayString = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 
 // 챗봇 페이지 on/off 상태
 export interface ChatBotPageState {
