@@ -18,7 +18,7 @@ const InterestGrid = ({interests, setInterests}:InterestGridProps) =>{
     }
 
     return (
-        <div className="grid m-9" style={{
+        <div className="w-full grid" style={{
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 // 30분 단위로 28개의 행을 생성
                 // gridTemplateRows: `repeat(${TIME_SLOTS.length}, 50px)`,

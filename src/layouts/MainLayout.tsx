@@ -10,15 +10,21 @@ const MainLayout = () => {
     const { isEditing } = useAddTimeTableStore();
     return (
         <>
-            <main className="relative flex flex-col justify-between w-[390px] h-[844px] bg-[#f6f6f6]">
+            <main className="relative flex flex-col justify-between w-full h-full bg-[#f6f6f6]">
                 <Outlet /> {/* 캘린더, 시간표, 리뷰, 마이페이지 등 등이 여기에 렌더링됨 */}
 
                 {isEditing ? <EditTableFrame /> :
                     <>
                         <ChatBotButton />
                         {isChatBotOpen ? <ChatBotFrame /> : null}
-                        <LowerNav />
                     </>}
+                <LowerNav />
+                {/* {isEditing ? <EditTableFrame /> :
+                    <>
+                        <ChatBotButton />
+                        {isChatBotOpen ? <ChatBotFrame /> : null}
+                        <LowerNav />
+                    </>} */}
             </main>
         </>
     )

@@ -37,8 +37,8 @@ const EditTableFrame = () => {
     }
 
     return (
-        <div className="flex flex-col justify-between items-center
-        w-[390px] h-96 bottom-0 absolute 
+        <div className="flex flex-col justify-between
+        w-full h-96 pl-4 pr-4 bottom-0 absolute 
         bg-white rounded-tl-2xl rounded-tr-2xl 
         shadow-[0px_-0.05000000074505806px_1px_0px_rgba(0,0,0,0.25)] 
         overflow-hidden z-10">
@@ -47,30 +47,31 @@ const EditTableFrame = () => {
             {selectedCell.length === 0 ? null :
                 <SelectedCell selectedCell={selectedCell} setSelectedCell={setSelectedCell} />}
 
-            <div className="flex flex-row justify-around items-center m-4 pt-2">
-                <div className="flex flex-col">
-                    <div className="w-32 h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">활동명</div>
-                    <input className="w-32 text-black text-sm font-medium font-['Pretendard'] leading-7"
+            <div className="flex flex-row justify-between items-center m-4 pt-2">
+                
+                <div className="flex flex-col w-full">
+                    <div className="w-[90%] h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">활동명</div>
+                    <input className="w-[90%] text-black text-sm font-medium font-['Pretendard'] leading-7"
                         onChange={(e) => {
                             setEventName(e.target.value)
                         }}
                         placeholder="예: 컴퓨터네트워크2" />
 
                     {/* 입력 하단 초록줄 */}
-                    <div className="w-36 h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
+                    <div className="w-[90%] h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
                 </div>
 
-                <div className="flex flex-col">
-                    <div className="w-32 h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">활동 설명</div>
-                    <input className="w-32 text-black text-sm font-medium font-['Pretendard'] leading-7"
+                <div className="flex flex-col w-full">
+                    <div className="w-[90%] h-6 text-left text-black text-xs font-light font-['Pretendard'] leading-7">활동 설명</div>
+                    <input className="w-[90%] text-black text-sm font-medium font-['Pretendard'] leading-7"
                         onChange={(e) => {
                             setEventDetail(e.target.value)
                         }}
                         placeholder="예: 공C487" />
-                    <div className="w-36 h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
+                    <div className="w-[90%] h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
                 </div>
 
-                <div className="flex flex-col justify-center"
+                <div className="flex flex-col justify-center w-6 h-6"
                     onClick={() => {
 
                         // 연속하게 select된 셀들 단위로 반복 요청.
@@ -91,7 +92,7 @@ const EditTableFrame = () => {
             {/* 클릭하여 이벤트 이름, 이벤트 설명, 색깔 불러오는 기능, 프리셋에서 제거 기능 추가 필요 */}
 
             <div className="flex flex-col justify-start items-center 
-            w-89 h-64 bg-[#005B3F] rounded-tl-2xl rounded-tr-2xl pl-2 pr-2" >
+            w-full h-full bg-[#005B3F] rounded-tl-2xl rounded-tr-2xl pl-4 pr-4 overflow-y-scroll no-scrollbar" >
                 {presets.map((preset) => {
                     return <CellPreset preset={preset} />
                 })}

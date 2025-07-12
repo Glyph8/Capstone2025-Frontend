@@ -1,10 +1,21 @@
-import {Outlet} from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import UpperNav from "../components/UpperNav";
 
-const AuthLayout = () =>{
-    return(
+const AuthLayout = () => {
+    const location = useLocation();
+    return (
         <>
-            <main className="w-[390px] min-h-[844px] bg-[#ffffff]">
-                <Outlet/> {/* LoginPage, SignupPage 등이 여기에 렌더링됨 */}
+            {location.pathname === "/auth" ? (
+                null
+            ) : (
+                (location.pathname === "/auth/login") ? (
+                <UpperNav text="로그인" otherBtn="None" />
+                ) : (
+                    <UpperNav text="회원가입" otherBtn="None" />
+                )
+            )}
+            <main className="flex flex-col w-full h-full bg-[#ffffff]">
+                <Outlet /> {/* LoginPage, SignupPage 등이 여기에 렌더링됨 */}
             </main>
         </>
     )

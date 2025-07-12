@@ -1,19 +1,18 @@
 
 type UserSpeechBubbleProps = {
-    text : string;
+    text: string;
 }
 
-const UserSpeechBubble = ({text}:UserSpeechBubbleProps) =>{
+const UserSpeechBubble = ({ text }: UserSpeechBubbleProps) => {
 
-    return(
-        
+    return (
+        <div className="flex flex-col w-full items-end">
+            <div className="w-[90%] min-h-16 bg-[#FCFFFF] rounded-tl-[50px] rounded-bl-[50px] p-3">
                 <div>
-                    <div className="w-92 min-h-16 bg-[#FCFFFF] rounded-tl-[50px] rounded-bl-[50px] p-3 mr-0">
-                        <div>
-                            {text}
-                        </div>
-                    </div>
+                    {text}
                 </div>
+            </div>
+        </div>
     )
 }
 

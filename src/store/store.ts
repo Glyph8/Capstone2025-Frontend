@@ -28,6 +28,24 @@ export const usePresetStore = create<PresetState>()((set) => ({
             eventName: '컴퓨터네트워크2',
             eventDetail: '공B471',
             color: '#005B3F'
+        },
+        {
+            id: "2",
+            eventName: '컴퓨터네트워크3',
+            eventDetail: '공B4712',
+            color: '#005B3F'
+        },
+        {
+            id: "3",
+            eventName: '네트워크2',
+            eventDetail: 'B471',
+            color: '#005B3F'
+        },
+        {
+            id: "4",
+            eventName: '졸업 프로젝트',
+            eventDetail: 'B471',
+            color: '#005B3F'
         }
     ],
 

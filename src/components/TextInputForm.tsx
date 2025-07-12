@@ -1,6 +1,6 @@
 
 type TextInputFormProps = {
-    label: string;
+    label?: string;
     placeholder?: string;
     isError: boolean;
     isPW: boolean;
@@ -11,7 +11,7 @@ const TextInputForm = ({ label, placeholder, isError, isPW, handleChange }: Text
     return (
         <form>
             {/* input label */}
-            <div className="w-32 h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">{label}</div>
+            <div className="w-full h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">{label}</div>
 
             {/* 비밀번호 입력 구분 */}
             {!isPW ?

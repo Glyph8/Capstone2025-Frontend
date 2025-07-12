@@ -2,12 +2,13 @@ import type { RecommendedProgram } from "../../types/types";
 
 type BotSpeechBubbleProps = {
     text: string;
+  
     recommendedProgramList?: RecommendedProgram[];
 };
 
 const BotSpeechBubble = ({ text, recommendedProgramList }: BotSpeechBubbleProps) => {
     return (
-        <div className="w-93 bg-[#FCFFFF] rounded-tr-[50px] rounded-br-[50px] p-4 space-y-3 shadow-md">
+        <div className="flex flex-col w-[90%] justify-start bg-[#FCFFFF] rounded-tr-[50px] rounded-br-[50px] p-4 space-y-3 shadow-md">
             <div className="text-sm whitespace-pre-line">{text}</div>
 
             {recommendedProgramList?.map((program, idx) => (
@@ -29,5 +30,6 @@ const BotSpeechBubble = ({ text, recommendedProgramList }: BotSpeechBubbleProps)
         </div>
     );
 };
+
 
 export default BotSpeechBubble;

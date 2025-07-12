@@ -7,3 +7,11 @@
 input:focus {
   outline: none;
 }
+
+body {
+  margin: 0 auto;
+  /* place-items: center; */
+  max-width: 800px;
+  min-width: 360px;
+  font-family: "Pretendard";
+}
