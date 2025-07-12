@@ -20,6 +20,7 @@ export const useSelectCellStore = create<SelectedCellState>()((set) => ({
     }))
 }));
 
+
 export const usePresetStore = create<PresetState>()((set) => ({
     presets: [
         {
@@ -58,9 +59,9 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
     loadTable: [
         {
             id: 'event-1',
-            day: 'TUE',
-            startTime: '0900',
-            endTime: '1030',
+            day: 'MON',
+            startTime: '11:00',
+            endTime: '1230',
             eventName: '주간 회의',
             eventDetail: '팀 전체 주간 목표 공유',
             color: '#D1E7DD', // 연한 녹색
@@ -68,8 +69,8 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
         {
             id: 'event-2',
             day: 'WED',
-            startTime: '1400',
-            endTime: '1600',
+            startTime: '0900',
+            endTime: '1030',
             eventName: '디자인 리뷰',
             eventDetail: '새로운 기능 UI/UX 검토fefaafaefaefefe',
             color: '#CFE2FF', // 연한 파랑
@@ -77,8 +78,8 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
         {
             id: 'event-3',
             day: 'FRI',
-            startTime: '1100',
-            endTime: '1230',
+            startTime: '1300',
+            endTime: '1430',
             eventName: '개인 프로젝트',
             eventDetail: '',
             color: '#FFF3CD', // 연한 노랑
@@ -86,6 +87,10 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
     ],
     setLoadTable: () => set(state => ({
         loadTable: state.loadTable
+    })),
+
+    addNewLoadTable: (newEvent) => set((state) => ({
+        loadTable: [...state.loadTable, newEvent]
     }))
 }))
 

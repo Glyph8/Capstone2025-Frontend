@@ -1,5 +1,6 @@
 import axios from "axios"
 import type { Event } from "../types/types";
+import { useLoadTableStore } from "../store/store";
 const TIMETABLE_API_URL = "/v1/member/timetable"
 
 // 추가할 시간표 정보 보내기 POST
@@ -28,3 +29,8 @@ export const sendEventRequest = ({ day, startTime, endTime,
 //     }
 // ] 
 
+
+export const sendDummyEventRequest = (event: Event) => {
+    const { addNewLoadTable } = useLoadTableStore.getState()
+    addNewLoadTable(event)
+}
