@@ -16,11 +16,14 @@ const SignupPage = () => {
     }
 
     const verifyByCode = async (email: string, code: string) => {
-        setIsVerifyed(true)
+
 
         const codeResult = verifyAuthCode(email, code);
+        console.log("api response", await codeResult)
         if (!await codeResult) {
+            alert("인증번호가 일치하지 않습니다.\n테스트를 위해 강제 진행합니다.")
             console.error();
+            setIsVerifyed(true)
 
         }
         else if (await codeResult) {

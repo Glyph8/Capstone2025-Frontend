@@ -1,7 +1,15 @@
 import axios from "axios"
 import type { Event } from "../types/types";
 import { useLoadTableStore } from "../store/store";
+import { apiClient } from "./auth";
 const TIMETABLE_API_URL = "/v1/member/timetable"
+
+export const getTimeTable = apiClient.get(TIMETABLE_API_URL)
+    .then((res) => {
+        console.log(res);
+        return res.data.result;
+    })
+    .catch((err) => console.error(err));
 
 // 추가할 시간표 정보 보내기 POST
 // 논의 추가 필요. 여러 요일, 여러 시간대 셀을 동시 클릭한 경우?
@@ -28,7 +36,6 @@ export const sendEventRequest = ({ day, startTime, endTime,
 //         "color": "#f6f6f6"
 //     }
 // ] 
-
 
 export const sendDummyEventRequest = (event: Event) => {
     const { addNewLoadTable } = useLoadTableStore.getState()

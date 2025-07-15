@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAddTimeTableStore, useSelectCellStore, useLoadTableStore } from "../../store/store";
 import type { dayString, Event } from "../../types/types";
+import { getTimeTable } from "../../apis/timetable";
 
 // --- 헬퍼 상수 및 함수 ---
 const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => { // 09:00 ~ 22:30 까지 30분 단위 슬롯
@@ -34,6 +35,22 @@ const TimeTableGrid = () => {
     const { isEditing } = useAddTimeTableStore();
     const { selectedCell, setSelectedCell } = useSelectCellStore();
     const { loadTable } = useLoadTableStore();
+
+    const loadTimeTable = async () => {
+        try {
+            const tableData = await getTimeTable;
+            console.log("시간표 불러오기 성공 : ", tableData);
+            return tableData;
+        }
+        catch (error) {
+            console.error("시간표 불러오기 실패", error);
+            return error;
+        }
+    }
+
+    useEffect(() => {
+        loadTimeTable();
+    }, [])
 
     const checkIsSelect = (halfHour: string, day: dayString) => {
         return selectedCell.some(
@@ -99,7 +116,7 @@ const TimeTableGrid = () => {
 
     return (
         <div
-            className="grid" 
+            className="grid"
             style={{
                 gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
                 // 30분 단위로 28개의 행을 생성
