@@ -10,7 +10,7 @@ const SelectItemButton = ({ text, handleClick }: SelectItemButtonProps) => {
     return (
         <div className="w-full">
             {isSelected ?
-                <div className="flex flex-col w-25 h-11 bg-neutral-100 rounded-2xl 
+                <div className="flex flex-col w-full h-11 bg-neutral-100 rounded-2xl 
                 text-center justify-center items-center
                 text-[#005B3F] text-lg font-normal font-['Pretendard'] leading-7"
                     onClick={() => {

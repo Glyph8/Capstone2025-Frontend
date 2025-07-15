@@ -12,14 +12,15 @@ const SetInterestPage = () => {
         console.log("관심 목록 전송")
         console.log(interests)
 
-        const result = await enrollInterest(interests)
+        try {
+            const result = await enrollInterest(interests);
+            if (result)
+                navigate('/auth/academic-info')
+            else
+                alert("try 요청 성공하였으나 result false")
 
-        if (result) {
-            navigate('/auth/academic-info')
-        }
-        else {
-            // 임시 시연용
-            navigate('/auth/academic-info')
+        } catch {
+            console.log("흥미 입력 전송에 에러 발생")
         }
 
     }

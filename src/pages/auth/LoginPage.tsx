@@ -2,25 +2,25 @@ import TextInputForm from "../../components/TextInputForm.tsx";
 import WideAcceptButton from "../../components/WideAcceptButton.tsx";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { testLogin } from "../../apis/auth.ts";
+import { loginRequest } from "../../apis/auth.ts";
 
 const LoginPage = () => {
     const navigate = useNavigate()
     const login = async () => {
-        // await loginRequest(email, pw)
-        //     .then((res) => {
-        //         // 에러 응답이 와도 main 진입하는 문제 해결 필요
-        //         console.log("로그인 성공 res : ", res);
-        //         navigate('/main/timetable')
-        //     })
-        //     .catch((err) => alert(`login 실패 Error : ${err}`));
-
-        await testLogin(email, pw)
+        await loginRequest(email, pw)
             .then((res) => {
+                // 에러 응답이 와도 main 진입하는 문제 해결 필요
                 console.log("로그인 성공 res : ", res);
                 navigate('/main/timetable')
             })
             .catch((err) => alert(`login 실패 Error : ${err}`));
+
+        // await testLogin(email, pw)
+        //     .then((res) => {
+        //         console.log("로그인 성공 res : ", res);
+        //         navigate('/main/timetable')
+        //     })
+        //     .catch((err) => alert(`login 실패 Error : ${err}`));
     }
 
     const [email, setEmail] = useState("");

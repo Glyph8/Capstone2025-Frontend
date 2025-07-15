@@ -11,13 +11,19 @@ const SignupPage = () => {
     const [isVerifyed, setIsVerifyed] = useState(false);
 
     const requestMail = async (email: string) => {
-        const mailResult = sendMailRequest(email);
-        setIsSendMail(await mailResult);
+        try {
+            const mailResult = await sendMailRequest(email);
+            if (mailResult)
+                setIsSendMail(await mailResult);
+            else
+                console.log("try 성공 result 실패")
+        }
+        catch {
+            alert("requestMAil 요청 실패")
+        }
     }
 
     const verifyByCode = async (email: string, code: string) => {
-
-
         const codeResult = verifyAuthCode(email, code);
         console.log("api response", await codeResult)
         if (!await codeResult) {
