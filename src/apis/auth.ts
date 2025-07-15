@@ -5,15 +5,18 @@ const AUTH_MAIL_API_URL = "https://capstone-backend.o-r.kr/v1/member/auth-mail"
 const AUTH_CODE_API_URL = "https://capstone-backend.o-r.kr/v1/member/auth-code"
 
 const PW_API_URL = "https://capstone-backend.o-r.kr/v1/member/password"
-const INTEREST_API_URL = "/v1/member/password"
-const STDINFO_API_URL = "/v1/member/password"
+const INTEREST_API_URL = "/v1/member/interest"
+const STDINFO_API_URL = "/v1/member/academic-info"
 
 export const apiClient = axios.create({ baseURL: 'https://capstone-backend.o-r.kr' });
 
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem('mainToken');
+    const token = localStorage.getItem("access-token");
     if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
+        config.headers['Authorization'] = token;
+    }
+    if (!token) {
+        throw new Error("Token not found in headers");
     }
     return config;
 });
@@ -22,34 +25,26 @@ apiClient.interceptors.request.use((config) => {
 export const loginRequest = (email: string, pw: string) => axios.post(LOGIN_API_URL, {
     email: email,
     pw: pw,
-}).then(Response => {
-    console.log(Response);
-    console.log(Response.headers);
-    console.log(Response.data);
-    localStorage.setItem("mainToken", Response.headers['access_token']);
-    return Response.data
+}).then(response => {
+    console.log(response);
+    console.log(response.headers);
+    console.log(response.data);
+    localStorage.setItem("access_token", response.headers['access_token']);
+    return response.data
 })
 
-// export const testLogin = (email: string, pw: string) => axios.post(LOGIN_API_URL, {
-//     email: "abc@def.com",
-//     pw: "password1234@#$"
-// }).then(Response => {
-//     console.log(email, pw, Response.data);
-//     localStorage.setItem("mainToken", "eyJhbGciOiJIUzI1NiJ9.eyJjYXRlZ29yeSI6ImFjY2Vzc190b2tlbiIsImVtYWlsIjoicHJhb284MDBAbmF2ZXIuY29tIiwicm9sZSI6IlJPTEVfVEVNUE9SQVJZX01FTUJFUiIsImlhdCI6MTc0ODE0NjU4OSwiZXhwIjoxNzQ4MTUwMTg5fQ.PTvTZ5Ctsb-FelHAVVfdSCiYTwoBtUpyLYlYUjMGHoQ");
-//     return Response.data
-// })
 
 // 메일 인증 번호 보내기 POST - result true 받음
 export const sendMailRequest = (mailAddress: string) => axios.post(AUTH_MAIL_API_URL, {
     // email: "abc@konkuk.ac.kr"
     email: `${mailAddress}`
 })
-    .then(Response => {
+    .then(response => {
         console.log("테스트용 메일 인증 확인 중. 실제 입력 값 : ", mailAddress)
-        console.log(Response)
-        console.log(Response.headers)
-        console.log(Response.data, Response.data.result)
-        return Response.data.result
+        console.log(response)
+        console.log(response.headers)
+        console.log(response.data, response.data.result)
+        return response.data.result
     }
     )
     .catch(error => {
@@ -64,14 +59,17 @@ export const verifyAuthCode = (mailAddress: string, code: string) => axios.post(
     email: `${mailAddress}`,
     code: code
 })
-    .then(Response => {
-        const token = Response.headers['access_token']
+    .then(response => {
+        const token = response.headers['access_token']
+        if (!token) {
+            throw new Error("Token not found in headers");
+        }
         console.log("메일 인증 번호 확인 중. 입력 값 : ", mailAddress, code)
-        console.log(Response)
-        console.log(Response.headers)
-        console.log(Response.data)
-        localStorage.setItem("passwordToken", token);
-        return Response.data.result
+        console.log(response)
+        console.log(response.headers)
+        console.log(response.data)
+        localStorage.setItem("password-token", token);
+        return response.data.result
     }
     )
     .catch(error => {
@@ -84,20 +82,22 @@ export const verifyAuthCode = (mailAddress: string, code: string) => axios.post(
 
 // 비밀번호 설정하기 POST - 메인 서비스 이용 토큰 응답받음.
 export const enrollPW = (password: string) => axios.post(PW_API_URL, {
-    // password: "password1234@#$"
     password: password
 }, {
     headers: {
-        Authorization: localStorage.getItem("passwordToken"),
-        // Authorization: `bearer ${localStorage.getItem("passwordToken")}`,
+        Authorization: localStorage.getItem("password-token"),
     }
 })
-    .then(Response => {
+    .then(response => {
         console.log("메인 서비스 토큰 요청 성공");
-        console.log("응답 데이터 : ", Response.data)
-        console.log("header : ", Response.headers)
-        localStorage.setItem("mainToken", Response.headers['access']);
-        return Response.data;
+        console.log("응답 데이터 : ", response.data)
+        console.log("header : ", response.headers)
+        const token = response.headers['access_token'];
+        if (!token) {
+            throw new Error("Token not found in headers");
+        }
+        localStorage.setItem("access-token", token);
+        return response.data;
     }
     )
     .catch(error => {
@@ -108,14 +108,15 @@ export const enrollPW = (password: string) => axios.post(PW_API_URL, {
 
 // 관심사항 입력하기 POST - result true 받음
 export const enrollInterest = (interests: string[]) => apiClient.post(INTEREST_API_URL, {
-    interestContent: interests
+    interestContent: interests.join(",")
 })
-    .then(Response => {
-        console.log(Response.data)
-        return Response.data
+    .then(response => {
+        console.log(response.data)
+        return response.data
     }
     )
     .catch(error => {
+        console.log("전송한 값 : ", interests)
         console.error(error)
         return false
     }
@@ -129,9 +130,9 @@ export const enrollAcademicInfo = (academicInfo: AcademicInfo) => apiClient.post
     department: academicInfo.department,
     name: academicInfo.name,
 })
-    .then(Response => {
-        console.log(Response.data)
-        return Response.data
+    .then(response => {
+        console.log(response.data)
+        return response.data
     }
     )
     .catch(error => {
