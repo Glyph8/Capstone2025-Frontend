@@ -11,7 +11,7 @@ const WideAcceptButton = ({ text, isClickable, handleClick }: WideAcceptButtonPr
                 <div className="w-[290px] h-[45px] rounded-[500px] bg-[#01A862] flex justify-center items-center m-[16px]"
                     onClick={handleClick}>
                     {/*클릭 가능 상태*/}
-                    <div className="w-[162px] h-[27px] flex-shrink-0 text-[#FCFFFF] text-center font-[Pretendard] text-[17px] not-italic font-medium leading-[28px]">
+                    <div className="w-full h-[27px] flex-shrink-0 text-[#FCFFFF] text-center font-[Pretendard] text-[17px] not-italic font-medium leading-[28px]">
                         {text}
                     </div>
                 </div>
