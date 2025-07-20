@@ -2,16 +2,27 @@ import TextInputForm from "../../components/TextInputForm.tsx";
 import WideAcceptButton from "../../components/WideAcceptButton.tsx";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { loginRequest } from "../../apis/auth.ts";
 
 const LoginPage = () => {
     const navigate = useNavigate()
-    const loginRequest = () => {
-        alert(`
-            EMAIL : ${email}
-            PW : ${pw}
-            `)
-        navigate('/main/timetable')
+    const login = async () => {
+        await loginRequest(email, pw)
+            .then((res) => {
+                // 에러 응답이 와도 main 진입하는 문제 해결 필요
+                console.log("로그인 성공 res : ", res);
+                navigate('/main/timetable')
+            })
+            .catch((err) => alert(`login 실패 Error : ${err}`));
+
+        // await testLogin(email, pw)
+        //     .then((res) => {
+        //         console.log("로그인 성공 res : ", res);
+        //         navigate('/main/timetable')
+        //     })
+        //     .catch((err) => alert(`login 실패 Error : ${err}`));
     }
+
     const [email, setEmail] = useState("");
     const [pw, setPw] = useState("");
 
@@ -48,7 +59,7 @@ const LoginPage = () => {
             </div>
 
             <div className="absolute bottom-22">
-                <WideAcceptButton text="로그인" isClickable={true} handleClick={loginRequest} />
+                <WideAcceptButton text="로그인" isClickable={true} handleClick={login} />
             </div>
 
         </div>

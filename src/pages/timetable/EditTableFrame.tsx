@@ -7,9 +7,9 @@ import { useSelectCellStore, usePresetStore } from "../../store/store";
 // import { sendEventRequest } from "../../apis/timetable";
 import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
-import { sendDummyEventRequest } from "../../apis/timetable";
-import type { selectedTime, addTimeRequest } from "../../types/types";
+import type { selectedTime, addTimeRequest, Event } from "../../types/types";
 import { useState } from "react";
+import { sendEventRequest } from "../../apis/timetable";
 
 const EditTableFrame = () => {
     const { selectedCell, setSelectedCell } = useSelectCellStore();
@@ -17,23 +17,33 @@ const EditTableFrame = () => {
     const [eventName, setEventName] = useState('');
     const [eventDetail, setEventDetail] = useState('');
 
+    const formatTimeString = (timeString: string): string => {
+        if (!/^\d{4}$/.test(timeString)) {
+            throw new Error("올바르지 않은 시간 형식입니다. 'HHMM' 4자리 문자열이어야 합니다.");
+        }
+
+        const hours = timeString.slice(0, 2);
+        const minutes = timeString.slice(2, 4);
+
+        return `${hours}:${minutes}:00.000000`;
+    }
 
     const addEvent = ({ selectedCell, eventName, eventDetail, color }: addTimeRequest) => {
         // sendEventRequest(day)
-        selectedCell.map((cell: selectedTime) => {
+
+        const sendEvent = selectedCell.map((cell: selectedTime) => {
             const eventItem = {
-                id: cell.day + '_' + cell.startTime,
+                // id: cell.day + '_' + cell.startTime,
                 day: cell.day,
-                startTime: cell.startTime,
-                endTime: cell.endTime,
+                startTime: formatTimeString(cell.startTime),
+                endTime: formatTimeString(cell.endTime),
                 eventName: eventName,
                 eventDetail: eventDetail,
                 color: color
             }
-            console.log(eventItem)
-            // sendEventRequest(eventItem)
-            sendDummyEventRequest(eventItem)
+            return eventItem as Event;
         })
+        sendEventRequest(sendEvent)
     }
 
     return (
@@ -48,7 +58,7 @@ const EditTableFrame = () => {
                 <SelectedCell selectedCell={selectedCell} setSelectedCell={setSelectedCell} />}
 
             <div className="flex flex-row justify-between items-center m-4 pt-2">
-                
+
                 <div className="flex flex-col w-full">
                     <div className="w-[90%] h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">활동명</div>
                     <input className="w-[90%] text-black text-sm font-medium font-['Pretendard'] leading-7"

@@ -15,7 +15,7 @@ const SetAcademicInfoPage = () => {
     const [userDepartment, setUserDepartment] = useState('자유전공학부');
     const [userName, setUserName] = useState('김건국');
 
-    const completeSign = () => {
+    const completeSign = async () => {
         const academicInfo = {
             academicStatus: userAcademicStatus,
             grade: userGrade,
@@ -23,8 +23,16 @@ const SetAcademicInfoPage = () => {
             department: userDepartment,
             name: userName,
         }
-        enrollAcademicInfo(academicInfo as AcademicInfo);
-        navigate('/main/timetable')
+        try {
+            const finalResult = await enrollAcademicInfo(academicInfo as AcademicInfo);
+            if (finalResult)
+                navigate('/main/timetable')
+            else
+                console.log("try 성공, result false")
+        }
+        catch {
+            alert("compleSign 요청 에러 발생")
+        }
     }
 
 
@@ -65,7 +73,7 @@ const SetAcademicInfoPage = () => {
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     학과
                 </div>
-                <TextInputForm label="소속 학과를 입력해주세요"placeholder="예: 컴퓨터공학부" isError={false} isPW={false} handleChange={setUserDepartment} />
+                <TextInputForm label="소속 학과를 입력해주세요" placeholder="예: 컴퓨터공학부" isError={false} isPW={false} handleChange={setUserDepartment} />
             </div>
 
             <div className="w-full mt-9">

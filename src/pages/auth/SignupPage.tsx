@@ -11,16 +11,25 @@ const SignupPage = () => {
     const [isVerifyed, setIsVerifyed] = useState(false);
 
     const requestMail = async (email: string) => {
-        const mailResult = sendMailRequest(email);
-        setIsSendMail(await mailResult);
+        try {
+            const mailResult = await sendMailRequest(email);
+            if (mailResult)
+                setIsSendMail(await mailResult);
+            else
+                console.log("try 성공 result 실패")
+        }
+        catch {
+            alert("requestMAil 요청 실패")
+        }
     }
 
     const verifyByCode = async (email: string, code: string) => {
-        setIsVerifyed(true)
-
         const codeResult = verifyAuthCode(email, code);
+        console.log("api response", await codeResult)
         if (!await codeResult) {
+            alert("인증번호가 일치하지 않습니다.\n테스트를 위해 강제 진행합니다.")
             console.error();
+            setIsVerifyed(true)
 
         }
         else if (await codeResult) {
