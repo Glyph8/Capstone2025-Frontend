@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import UpperNav from "../../components/UpperNav";
 import WideAcceptButton from "../../components/WideAcceptButton";
 
@@ -51,6 +51,8 @@ const MyPage = () => {
                         </div>
                     </div>
                 </nav>
+
+                <Outlet/>
 
                 <div className="w-full h-auto flex flex-col justify-center items-center mt-22">
                     <WideAcceptButton text="히스토리 조회 및 리뷰작성" isClickable={true} handleClick={handleReviewBtn} />

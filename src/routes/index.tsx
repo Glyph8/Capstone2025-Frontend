@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage.tsx";
 import SignupPage from "../pages/auth/SignupPage.tsx";
 import NotFound from "../pages/NotFound.tsx";
@@ -11,6 +11,7 @@ import ReviewPage from "../pages/review/ReviewPage.tsx";
 import MyPage from "../pages/mypage/MyPage.tsx";
 import SetInterestPage from "../pages/auth/SetInterestPage.tsx";
 import SetAcademicInfoPage from "../pages/auth/SetAcademicInfoPage.tsx";
+import HistoryPage from "../pages/mypage/history/HistoryPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -63,9 +64,18 @@ const router = createBrowserRouter([
             },
             {
                 path: 'mypage',
-                element: <MyPage />
+                element: <Outlet />,
+                children: [
+                    {
+                        index: true,
+                        element: <MyPage />
+                    },
+                    {
+                        path: 'history',
+                        element: <HistoryPage />
+                    }
+                ]
             }
-
         ]
     }
 
