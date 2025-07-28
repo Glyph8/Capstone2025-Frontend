@@ -8,7 +8,7 @@ type UpperNavProps = {
 const UpperNav = ({ text, otherBtn, handleBtn }: UpperNavProps) => {
     const navigate = useNavigate()
     return (
-            <div className="w-full h-16 p-4 flex flex-row justify-between items-center bg-[#FCFFFF] shadow-sm sticky top-0 z-10">
+            <div className="w-full h-16 p-4 flex flex-row justify-between items-center bg-[#FCFFFF] shadow-sm fixed top-0 z-10">
                 <div className="inline-flex justify-center items-center gap-2.5" onClick={() => {
                     navigate(-1)
                 }}>
