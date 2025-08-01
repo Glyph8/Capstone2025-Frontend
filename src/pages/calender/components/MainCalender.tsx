@@ -28,49 +28,92 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
     new Date(today.getFullYear(), today.getMonth(), today.getDate())
   )
 
+  const showEvent = (event: CalendarData) => {
+    if (event) {
+      let type = "--";
+      let typeBarColor = "#fff";
+      let typeBlockColor = "#fff";
+      if (event.scheduleType === "EXTRACURRICULAR"){
+        type = "비교과";
+        typeBarColor = "after:bg-red-500"
+        typeBlockColor = "bg-red-500"
+      }
+        
+      else{
+        type = "일반";
+        typeBarColor = "after:bg-blue-500";
+        typeBlockColor = "bg-blue-500";
+      }
+        
+      return (
+        <div
+          key={event.title}
+          className={`bg-muted ${typeBarColor} relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}
+        >
+          <div className="flex justify-between font-medium">
+            {event.title}
+            <span className={`w-14 text-center rounded-[5px] ${typeBlockColor} text-white`}>
+              {type}
+            </span>
+
+          </div>
+          <div className="text-muted-foreground text-xs">
+            {event.startDate} 부터 ~
+            {event.endDate} 까지
+          </div>
+        </div>
+      )
+
+    } else {
+      return <span>일정 데이터 로드 오류</span>
+    }
+
+
+  }
+
   const stringToDate = (stringDate: string) => {
     const [year, month, day] = stringDate.split("-").map(Number);
     return new Date(year, month - 1, day);
   }
 
-  const isInRange = (event:CalendarData) =>{
-      return date && (stringToDate(event.startDate) <= date && stringToDate(event.endDate) >= date)
+  const isInRange = (event: CalendarData) => {
+    return date && (stringToDate(event.startDate) <= date && stringToDate(event.endDate) >= date)
   }
 
-  const isInData = (year:number, month:number, day:number) =>{
+  const isInData = (year: number, month: number, day: number) => {
     const comp = new Date(year, month, day)
-    const filtered = data.filter((d)=>{
+    const filtered = data.filter((d) => {
       return date && (stringToDate(d.startDate) <= comp && stringToDate(d.endDate) >= comp)
     })
     console.log(filtered);
-    if(filtered.length > 0){
+    if (filtered.length > 0) {
       let isExt = false;
       let isNorm = false;
-      filtered.map((f)=>{
-        if(f.scheduleType === "EXTRACURRICULAR"){
+      filtered.map((f) => {
+        if (f.scheduleType === "EXTRACURRICULAR") {
           isExt = true;
         }
-        if(f.scheduleType === "NORMAL"){
+        if (f.scheduleType === "NORMAL") {
           isNorm = true;
         }
       })
-      if(isExt && isNorm){
+      if (isExt && isNorm) {
         return (<div className="flex gap-0.5">
-          <span className="w-1 h-1 rounded-full bg-red-500"/>
-          <span className="w-1 h-1 rounded-full bg-blue-500"/>
+          <span className="w-1 h-1 rounded-full bg-red-500" />
+          <span className="w-1 h-1 rounded-full bg-blue-500" />
         </div>
         )
       }
-      else if(isNorm){
-        return <div className="w-1 h-1 rounded-full bg-blue-500"/>;
+      else if (isNorm) {
+        return <div className="w-1 h-1 rounded-full bg-blue-500" />;
       }
-      else if(isExt){
-        return <div className="w-1 h-1 rounded-full bg-red-500"/>;
+      else if (isExt) {
+        return <div className="w-1 h-1 rounded-full bg-red-500" />;
       }
       else
         return null;
     }
-    else{
+    else {
       return null;
     }
   }
@@ -123,17 +166,7 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
           {data.map((event) => (
             <>
               {isInRange(event) ? (
-                <div
-                  key={event.title}
-                  className="bg-muted after:bg-primary/70 relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full"
-                >
-                  <div className="font-medium">{event.title}</div>
-                  <div className="text-muted-foreground text-xs">
-                    {event.scheduleType} : s
-                    {event.startDate} ➡ 
-                    {event.endDate}
-                  </div>
-                </div>
+                showEvent(event)
               ) : null}
             </>
           ))}
