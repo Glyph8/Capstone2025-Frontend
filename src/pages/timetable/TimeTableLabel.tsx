@@ -1,6 +1,4 @@
-
 const TimeTableLabel = () => {
-
 
     return (
         <div className="w-full h-8 flex justify-around items-center pt-8 pl-4 pr-4 pb-6">

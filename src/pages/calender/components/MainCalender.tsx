@@ -1,56 +1,145 @@
 import * as React from "react"
-import type { DateRange } from "react-day-picker"
+import { Calendar, CalendarDayButton, } from "@/components/ui/calendar"
+// import { formatDateRange } from "little-date"
+import { PlusIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import type { CalendarData } from "@/types/calendar-types"
 
-import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+// {
+//   "result": [
+//     {
+//       "scheduleId": 1,
+//       "title": "A비교과",
+//       "scheduleType": "EXTRACURRICULAR(비교과 관련), NORMAL(일반 일정)",
+//       "startDate": "2025-07-19",
+//       "endDate": "2025-07-20"
+//     }
+//   ]
+// }
 
-const MainCalendar = () => {
-  const [range, setRange] = React.useState<DateRange | undefined>({
-    from: new Date(2025, 5, 12),
-    to: new Date(2025, 5, 17),
-  })
-
-  return (
-    <Calendar
-      mode="range"
-      defaultMonth={range?.from}
-      selected={range}
-      onSelect={setRange}
-      numberOfMonths={1}
-      captionLayout="dropdown"
-      className="w-full rounded-lg border shadow-sm [--cell-size:--spacing(11)] md:[--cell-size:--spacing(13)]"
-      formatters={{
-        formatMonthDropdown: (date) => {
-          return date.toLocaleString("default", { month: "long" })
-        },
-      }}
-      components={{
-        DayButton: ({ children, modifiers, day, ...props }) => {
-          const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6
-
-          return (
-            <CalendarDayButton day={day} modifiers={modifiers} {...props}>
-              {children}
-              {!modifiers.outside && <span>{isWeekend ? "$220" : "$100"}</span>}
-            </CalendarDayButton>
-          )
-        },
-      }}
-    />
-  )
+interface MainCalendarProps {
+  data: CalendarData[];
 }
 
-export function Calendar18() {
+const MainCalendar = ({ data }: MainCalendarProps) => {
+  const today = new Date();
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date(2025, 5, 12)
+    new Date(today.getFullYear(), today.getMonth(), today.getDate())
   )
+
+  const stringToDate = (stringDate: string) => {
+    const [year, month, day] = stringDate.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  const isInRange = (event:CalendarData) =>{
+      return date && (stringToDate(event.startDate) <= date && stringToDate(event.endDate) >= date)
+  }
+
+  const isInData = (year:number, month:number, day:number) =>{
+    const comp = new Date(year, month, day)
+    const filtered = data.filter((d)=>{
+      return date && (stringToDate(d.startDate) <= comp && stringToDate(d.endDate) >= comp)
+    })
+    console.log(filtered);
+    if(filtered.length > 0){
+      let isExt = false;
+      let isNorm = false;
+      filtered.map((f)=>{
+        if(f.scheduleType === "EXTRACURRICULAR"){
+          isExt = true;
+        }
+        if(f.scheduleType === "NORMAL"){
+          isNorm = true;
+        }
+      })
+      if(isExt && isNorm){
+        return (<div className="flex gap-0.5">
+          <span className="w-1 h-1 rounded-full bg-red-500"/>
+          <span className="w-1 h-1 rounded-full bg-blue-500"/>
+        </div>
+        )
+      }
+      else if(isNorm){
+        return <div className="w-1 h-1 rounded-full bg-blue-500"/>;
+      }
+      else if(isExt){
+        return <div className="w-1 h-1 rounded-full bg-red-500"/>;
+      }
+      else
+        return null;
+    }
+    else{
+      return null;
+    }
+  }
+
+
   return (
-    <Calendar
-      mode="single"
-      selected={date}
-      onSelect={setDate}
-      className="rounded-lg border [--cell-size:--spacing(11)] md:[--cell-size:--spacing(12)]"
-      buttonVariant="ghost"
-    />
+    <Card className="w-full py-4">
+      <CardContent className="px-4">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          className="bg-transparent p-0"
+          required
+          components={{
+            DayButton: ({ children, modifiers, day, ...props }) => {
+              const year = day.date.getFullYear();
+              const month = day.date.getMonth();
+              const date = day.date.getDate();
+              return (
+                <CalendarDayButton day={day} modifiers={modifiers} {...props}>
+                  {children}
+                  {isInData(year, month, date)}
+                </CalendarDayButton>
+              )
+            },
+          }}
+        />
+      </CardContent>
+      <CardFooter className="flex flex-col items-start gap-3 border-t px-4 !pt-4">
+        <div className="flex w-full items-center justify-between px-1">
+          <div className="text-sm font-medium">
+            {date?.toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            title="Add Event"
+          >
+            <PlusIcon />
+            <span className="sr-only">Add Event</span>
+          </Button>
+        </div>
+        <div className="flex w-full flex-col gap-2">
+          {data.map((event) => (
+            <>
+              {isInRange(event) ? (
+                <div
+                  key={event.title}
+                  className="bg-muted after:bg-primary/70 relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full"
+                >
+                  <div className="font-medium">{event.title}</div>
+                  <div className="text-muted-foreground text-xs">
+                    {event.scheduleType} : s
+                    {event.startDate} ➡ 
+                    {event.endDate}
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
   )
 }
 

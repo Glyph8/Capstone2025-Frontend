@@ -1,5 +1,4 @@
-
-import type { Preset } from "../../types/types";
+import type { Preset } from "@/types/timetable-types";
 
 type CellPresetProps = {
     preset: Preset;

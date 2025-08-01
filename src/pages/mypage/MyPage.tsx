@@ -23,9 +23,9 @@ const MyPage = () => {
     }
 
     return (
-        <div className="w-full h-full pb-12">
+        <div className="w-full h-[100vh] pb-12">
             <UpperNav text="회원정보" />
-            <div className="h-full bg-white pl-11 pr-11 pb-11">
+            <div className="h-full bg-white pl-11 pr-11">
                 <nav className="flex flex-col justify-start items-start pt-8">
                     <div className="w-full h-12 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                         회원 정보 수정
@@ -54,11 +54,11 @@ const MyPage = () => {
 
                 <Outlet/>
 
-                <div className="w-full h-auto flex flex-col justify-center items-center mt-22">
+                <div className="w-full h-auto flex flex-col justify-center items-center mt-16">
                     <WideAcceptButton text="히스토리 조회 및 리뷰작성" isClickable={true} handleClick={handleReviewBtn} />
                     
                     
-                    <div className="mt-62 text-black text-sm font-normal font-['Pretendard'] 
+                    <div className="mt-32 text-black text-sm font-normal font-['Pretendard'] 
             underline leading-loose"
                         onClick={handleLogout}>
                         로그아웃

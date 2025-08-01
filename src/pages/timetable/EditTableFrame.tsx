@@ -7,9 +7,9 @@ import { useSelectCellStore, usePresetStore } from "../../store/store";
 // import { sendEventRequest } from "../../apis/timetable";
 import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
-import type { selectedTime, addTimeRequest, Event } from "../../types/types";
 import { useState } from "react";
 import { sendEventRequest } from "../../apis/timetable";
+import type { Event, addTimeRequest, selectedTime } from "@/types/timetable-types";
 
 const EditTableFrame = () => {
     const { selectedCell, setSelectedCell } = useSelectCellStore();

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { DateRange } from "react-day-picker"
+import type { DateRange } from "react-day-picker"
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
 

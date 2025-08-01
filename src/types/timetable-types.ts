@@ -1,19 +1,4 @@
-
-export interface AcademicInfo {
-    academicStatus: "ENROLLED" | "LEAVE_OF_ABSENCE" | "GRADUATED",
-    grade: number,
-    college: string,
-    department: string,
-    name: string
-}
-
 export type dayString = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
-
-// 챗봇 페이지 on/off 상태
-export interface ChatBotPageState {
-    isChatBotOpen: boolean;
-    openChatBotPage: () => void;
-}
 
 // 시간표 추가 UI on / off 상태
 export interface AddTimeTableState {
@@ -61,7 +46,6 @@ export interface PresetState {
     setPresets: (newPresets: Preset[]) => void;
 }
 
-
 // 중첩 map으로 시간표 작성하는 경우 type - deprecated..
 export interface timeCell {
     day: string; //필수, 디폴트 설정⭕
@@ -103,20 +87,3 @@ export function createEvent(event: Omit<Event, 'id'>): Event {
         id: `${event.day}_${event.startTime}`,
     };
 }
-
-export type ContextType =
-    | { type: 'user'; message: string }
-    | { type: 'bot'; answer: string; recommendedProgramList?: RecommendedProgram[] };
-
-export interface RecommendedProgram {
-    title: string;
-    url: string;
-    applicationPeriod: string;
-    targetAudience: string;
-    selectionMethod: string;
-    duration: string;
-    purposeOfTheActivity: string;
-    participationBenefitsAndExpectedOutcomes: string;
-    process: string;
-    modeOfOperation: string;
-};

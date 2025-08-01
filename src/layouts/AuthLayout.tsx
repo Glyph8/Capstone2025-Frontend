@@ -4,7 +4,7 @@ import UpperNav from "../components/UpperNav";
 const AuthLayout = () => {
     const location = useLocation();
     return (
-        <>
+        <div className="w-full h-[100vh]">
             {location.pathname === "/auth" ? (
                 null
             ) : (
@@ -14,10 +14,10 @@ const AuthLayout = () => {
                     <UpperNav text="회원가입" otherBtn="None" />
                 )
             )}
-            <main className="flex flex-col w-full h-full bg-[#ffffff]">
+            <main className="flex flex-col w-full bg-[#ffffff]">
                 <Outlet /> {/* LoginPage, SignupPage 등이 여기에 렌더링됨 */}
             </main>
-        </>
+        </div>
     )
 }
 export default AuthLayout;

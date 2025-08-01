@@ -3,7 +3,7 @@ import { useChatBotPageStore } from "../../store/store.ts"
 import BotSpeechBubble from "./BotSpeechBubble.tsx";
 import UserSpeechBubble from "./UserSpeechBubble.tsx";
 import { sendQuestionDummy } from "../../apis/chatbot.ts";
-import type { ContextType } from "../../types/types.ts";
+import type { ContextType } from "@/types/chatbot-types.ts";
 
 const ChatBotFrame = () => {
     const { openChatBotPage } = useChatBotPageStore();
