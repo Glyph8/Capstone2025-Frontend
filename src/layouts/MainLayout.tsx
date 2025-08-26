@@ -18,14 +18,6 @@ const MainLayout = () => {
                         <ChatBotButton />
                         {isChatBotOpen ? <ChatBotFrame /> : null}
                     </>}
-
-               
-                {/* {isEditing ? <EditTableFrame /> :
-                    <>
-                        <ChatBotButton />
-                        {isChatBotOpen ? <ChatBotFrame /> : null}
-                        <LowerNav />
-                    </>} */}
             </main>
              <LowerNav />
         </div>

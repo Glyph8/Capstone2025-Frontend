@@ -1,5 +1,4 @@
-import axios from "axios"
-const CHATBOT_API_URL = "/v1/chat/"
+import api from "@/apis/index"
 
 export const sendQuestionDummy = (question: string) => {
     console.log(question)
@@ -23,7 +22,8 @@ export const sendQuestionDummy = (question: string) => {
   return result
 }
 
-export const sendQuestion = (question: string) => axios.post(CHATBOT_API_URL, {
+
+export const sendQuestion = (question: string) => api.questionToChatServer({
         question : question,
     })
         .then(Response => {
@@ -35,7 +35,16 @@ export const sendQuestion = (question: string) => axios.post(CHATBOT_API_URL, {
             return error
         });
 
-
+/** 아직 완성안된듯? */
+export const registerUserToChatbot = () => api.registerMemberInfo()
+        .then(Response => {
+            console.log(Response.data)
+            return Response.data.result
+        })
+        .catch(error => {
+            console.error(error)
+            return error
+        });
 
 // {
 //   "result": {
