@@ -2,24 +2,26 @@ import UpperNav from "@/components/UpperNav"
 import MainCalendar from "./components/MainCalender"
 import { useEffect, useState } from "react"
 import { getCalendarApi } from "@/apis/calendar";
-import type { CalendarData } from "@/types/calendar-types";
 import { dummyCalender } from "./constants";
+import type { GetScheduleByYearAndMonthResponse } from "@/api/Api";
+import type { YearMonth } from "@/types/calendar-types";
 
 const CalenderPage = () => {
     const today = new Date();  
     const nowYear = today.getFullYear();
     const nowMonth = today.getMonth()
 
-    const [requestYM, setRequestYM] = useState({
+    const [requestYM, setRequestYM] = useState<YearMonth>({
         year: nowYear,
         month: nowMonth
     })
-    const [data, setData] = useState<CalendarData[]>([]);
+
+    const [data, setData] = useState<GetScheduleByYearAndMonthResponse[]|undefined>([]);
 
     const getResult = async(year:number, month:number)=>{
         return await getCalendarApi(year, month);
     }
-
+// GetScheduleDetailResponse
     useEffect(()=>{
         const process = async()=>{
             try{
@@ -40,7 +42,7 @@ const CalenderPage = () => {
         <div className="flex flex-col justify-between w-full h-full overflow-y-scroll no-scrollbar">
             <UpperNav text="2025년 1학기" />
             <main className="py-4 px-4 mt-[57px]">
-                <MainCalendar data={data} />        
+                <MainCalendar data={data} setRequestYM={setRequestYM}/>        
             </main>
         </div>
     )

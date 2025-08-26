@@ -19,7 +19,6 @@ export const loginRequest = (email: string, pw: string) => axios.post(LOGIN_API_
     return response.data
 })
 
-
 // 메일 인증 번호 보내기 POST - result true 받음
 export const sendMailRequest = (mailAddress: string) => axios.post(AUTH_MAIL_API_URL, {
     // email: "abc@konkuk.ac.kr"

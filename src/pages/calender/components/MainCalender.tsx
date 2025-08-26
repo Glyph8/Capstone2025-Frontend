@@ -1,26 +1,29 @@
 import { Calendar, CalendarDayButton, } from "@/components/ui/calendar"
-// import { formatDateRange } from "little-date"
 import { PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import type { CalendarData } from "@/types/calendar-types"
+import type { YearMonth } from "@/types/calendar-types"
 import { CreateScheduleDialog } from "./CreateScheduleDialog"
 import { useState } from "react"
+import type { GetScheduleByYearAndMonthResponse } from "@/api/Api"
+import { ko } from "date-fns/locale"
+import { format } from "date-fns"
 
 interface MainCalendarProps {
-  data: CalendarData[];
+  data?: GetScheduleByYearAndMonthResponse[];
+  setRequestYM: React.Dispatch<React.SetStateAction<YearMonth>>
 }
 
 
-const MainCalendar = ({ data }: MainCalendarProps) => {
+const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
   const today = new Date();
   const [date, setDate] = useState<Date | undefined>(
     new Date(today.getFullYear(), today.getMonth(), today.getDate())
   )
   const [isOpenDialog, setIsOpenDialog] = useState(false);
-  const [selectedData, setSelectedData] = useState<CalendarData|null>(null)
+  const [selectedId, setSelectedId] = useState(-1);
 
-  const showEvent = (event: CalendarData) => {
+  const showEvent = (event: GetScheduleByYearAndMonthResponse) => {
     if (event) {
       let type = "--";
       let typeBarColor = "#fff";
@@ -41,7 +44,7 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
         <div
           key={event.title}
           className={`bg-muted ${typeBarColor} relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}        
-          onClick={handleScheduleClick}>
+          onClick={()=>handleScheduleClick(event.scheduleId ?? -1)}>
           <div className="flex justify-between font-medium">
             {event.title}
             <span className={`w-14 text-center rounded-[5px] ${typeBlockColor} text-white`}>
@@ -50,8 +53,8 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
 
           </div>
           <div className="text-muted-foreground text-xs">
-            {event.startDate} 부터 ~
-            {event.endDate} 까지
+            {event.startDateTime} 부터 ~
+            {event.endDateTime} 까지
           </div>
         </div>
       )
@@ -65,16 +68,19 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
     return new Date(year, month - 1, day);
   }
 
-  const isInRange = (event: CalendarData) => {
-    return date && (stringToDate(event.startDate) <= date && stringToDate(event.endDate) >= date)
+  const isInRange = (event: GetScheduleByYearAndMonthResponse) => {
+    // event의 start, endDateTime이 undifined라면 오늘 날짜정보로 대체 
+    return date && (stringToDate(event?.startDateTime ?? today.getDate().toString()) <= date && stringToDate(event.endDateTime ?? today.getDate().toString()) >= date)
   }
 
   const isInData = (year: number, month: number, day: number) => {
     const comp = new Date(year, month, day)
-    const filtered = data.filter((d) => {
-      return date && (stringToDate(d.startDate) <= comp && stringToDate(d.endDate) >= comp)
+    const filtered = (data ?? []).filter((d) => {
+      if(d.startDateTime && d.endDateTime){
+        return date && (stringToDate(d.startDateTime) <= comp && stringToDate(d.endDateTime) >= comp)
+      }
     })
-    console.log(filtered);
+    // console.log(filtered);
     if (filtered.length > 0) {
       let isExt = false;
       let isNorm = false;
@@ -107,13 +113,14 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
     }
   }
 
-  const handleScheduleClick = () =>{
+  const handleScheduleClick = (id:number) =>{
+    setSelectedId(id)
     setIsOpenDialog(true);
   }
+  
   return (
     <Card className="w-full py-4">
-      <CreateScheduleDialog isOpen={isOpenDialog} setIsOpen={setIsOpenDialog}
-      data={selectedData}/>
+      <CreateScheduleDialog isOpen={isOpenDialog} setIsOpen={setIsOpenDialog} scheduleId={selectedId}/>
       <CardContent className="px-4">
         <Calendar
           mode="single"
@@ -133,6 +140,12 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
                 </CalendarDayButton>
               )
             },
+          }}
+          locale={ko}
+          formatters={{
+            formatCaption:(date)=>{
+              return format(date, "yyyy년 M월", {locale:ko})
+            }
           }}
         />
       </CardContent>
@@ -156,7 +169,7 @@ const MainCalendar = ({ data }: MainCalendarProps) => {
           </Button>
         </div>
         <div className="flex w-full flex-col gap-2">
-          {data.map((event) => (
+          {(data ?? []).map((event) => (
             <>
               {isInRange(event) ? (
                 showEvent(event)

@@ -5,3 +5,8 @@ export interface CalendarData {
   startDate: string;
   endDate: string;
 }
+
+export interface YearMonth{
+     year: number,
+    month: number
+}

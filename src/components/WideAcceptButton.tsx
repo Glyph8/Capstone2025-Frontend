@@ -6,7 +6,7 @@ type WideAcceptButtonProps = {
 
 const WideAcceptButton = ({ text, isClickable, handleClick }: WideAcceptButtonProps) => {
     return (
-        <div className="mt-10">
+        <div className="">
             {isClickable ? (<>
                 <div className="w-[290px] h-[45px] rounded-[500px] bg-[#01A862] flex justify-center items-center"
                     onClick={handleClick}>

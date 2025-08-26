@@ -1,29 +1,57 @@
+import type { GetScheduleDetailResponse } from "@/api/Api";
+import { getDetailScheduleApi } from "@/apis/calendar";
 import { DialogFooter } from "@/components/ui/dialog"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import WideAcceptButton from "@/components/WideAcceptButton";
-import type { CalendarData } from "@/types/calendar-types";
 import { useEffect, useState } from "react";
+import { dummySchedule } from "../constants";
 
 interface CreateScheduleDialogProps {
     isOpen: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    scheduleId: number
+    scheduleId?: number
 }
 
-const emptyData:CalendarData= {
-    scheduleId: -1,
+const emptyData: GetScheduleDetailResponse = {
     title: "",
-    scheduleType: "",
-    startDate: "",
-    endDate: "",
+    scheduleType: undefined,
+    startDateTime: "",
+    endDateTime: "",
+    
 }
 
-export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId}: CreateScheduleDialogProps) => {
-    const [data, setData] = useState(emptyData);
-    useEffect(()=>{
-        
-    }, [])
-    
+export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId }: CreateScheduleDialogProps) => {
+    const [data, setData] = useState<GetScheduleDetailResponse>(emptyData);
+    const [title, setTitle] = useState(data.title);
+    const [content, setContent] = useState(data.content);
+    const [startDateTime, setStartDateTime] = useState(data.startDateTime);
+    const [endDateTime, setEndDateTime] = useState(data.endDateTime);
+
+    useEffect(() => {
+        const process = async () => {
+            try {
+                if(scheduleId){
+                    const result = await getDetailScheduleApi(scheduleId);
+                    setData(result ?? emptyData);
+                }
+                else{
+                    console.error("입력받은 scheduleId가 undeifined. scheduleId : ", scheduleId);
+                }                
+            } catch (error) {
+                console.error(error);
+                console.log("스케쥴 상세 조회 더미 데이터 로드")
+                setTitle(dummySchedule.title);
+                setContent(dummySchedule.content);
+                setStartDateTime(dummySchedule.startDateTime);
+                setEndDateTime(dummySchedule.endDateTime);
+            } finally {
+                console.log("CalendarPage api finally")
+            }
+        }
+        process();
+
+    }, [scheduleId])
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTitle hidden>
@@ -37,21 +65,25 @@ export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId}: CreateSch
                         <span className="text-gray-2 text-base font-normal leading-loose">
                             제목
                         </span>
-                        <input className="text-black-1 text-base font-medium leading-loose" value={data.title} placeholder="123123123" />
+                        <input className="text-black-1 text-base font-medium leading-loose" 
+                        value={title} placeholder="일정의 제목을 입력해주세요." 
+                        onChange={(e)=>setTitle(e.target.value)}/>
                     </span>
 
                     <span className="flex gap-5">
                         <span className="text-gray-2 text-base font-normal leading-loose">
                             설명
                         </span>
-                        <input className="text-black-1 text-base font-medium leading-loose" value={data.content} />
+                        <input className="text-black-1 text-base font-medium leading-loose" value={content} 
+                         onChange={(e)=>setContent(e.target.value)}/>
                     </span>
 
                     <span className="flex gap-5">
                         <span className="text-gray-2 text-base font-normal leading-loose">
                             시작 시간
                         </span>
-                        <input className="text-black-1 text-base font-medium leading-loose" value={data.startDate} />
+                        <input className="text-black-1 text-base font-medium leading-loose" value={startDateTime} 
+                         onChange={(e)=>setStartDateTime(e.target.value)}/>
 
                     </span>
 
@@ -59,12 +91,12 @@ export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId}: CreateSch
                         <span className="text-gray-2 text-base font-normal leading-loose">
                             종료 시간
                         </span>
-                        <input className="text-black-1 text-base font-medium leading-loose" value={data.endDate} />
-
+                        <input className="text-black-1 text-base font-medium leading-loose" value={endDateTime}
+                         onChange={(e)=>setEndDateTime(e.target.value)}/>
                     </span>
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="flex items-center justify-center">
                     <WideAcceptButton text={"추가 / 수정"} isClickable={true} handleClick={() => setIsOpen(false)} />
                 </DialogFooter>
 
