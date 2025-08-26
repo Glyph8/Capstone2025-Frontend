@@ -6,7 +6,7 @@ import { useAddTimeTableStore } from "../../store/store.ts";
 const TimeTablePage = () => {
     const { setIsEditing } = useAddTimeTableStore();
     return (
-        <div className="w-full h-full">
+        <div className="w-full">
             <UpperNav text="2025년 1학기" otherBtn="edit-timetable" handleBtn={setIsEditing} />
             <div className="bg-[#005B3F]">
                 <TimeTableLabel />

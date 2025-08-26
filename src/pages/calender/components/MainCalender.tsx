@@ -42,7 +42,7 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
 
       return (
         <div
-          key={event.title}
+           key={`event-${event.scheduleId ?? Math.random()}`}
           className={`bg-muted ${typeBarColor} relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}        
           onClick={()=>handleScheduleClick(event.scheduleId ?? -1)}>
           <div className="flex justify-between font-medium">
@@ -84,14 +84,14 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
     if (filtered.length > 0) {
       let isExt = false;
       let isNorm = false;
-      filtered.map((f) => {
+      filtered.forEach((f) => {
         if (f.scheduleType === "EXTRACURRICULAR") {
           isExt = true;
         }
         if (f.scheduleType === "NORMAL") {
           isNorm = true;
         }
-      })
+      });
       if (isExt && isNorm) {
         return (<div className="flex gap-0.5">
           <span className="w-1 h-1 rounded-full bg-red-500" />

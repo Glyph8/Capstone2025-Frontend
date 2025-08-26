@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "json-server --watch db.json --port 3001",
-    "generate:api": "swagger-typescript-api generate -p https://capstone-backend.o-r.kr/v3/api-docs -o ./src/api --clean-output --axios"
+  "generate:api": "swagger-typescript-api generate -p https://capstone-backend.o-r.kr/v3/api-docs -o ./src/generated-api --clean-output --axios",
+  "generate:api:local": "swagger-typescript-api generate -p ./openapi.json -o ./src/generated-api --clean-output --axios"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

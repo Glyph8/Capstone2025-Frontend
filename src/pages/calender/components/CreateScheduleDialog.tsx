@@ -54,7 +54,7 @@ export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId }: CreateSc
                     }
                 }
                 else {
-                    console.error("입력받은 scheduleId가 undeifined. scheduleId : ", scheduleId);
+                    console.error("입력받은 scheduleId가 undefined. scheduleId : ", scheduleId);
                 }
             } catch (error) {
                 console.error(error);
@@ -95,12 +95,12 @@ export const CreateScheduleDialog = ({ isOpen, setIsOpen, scheduleId }: CreateSc
                             타입
                         </span>
                         <div>
-                            <input type="radio" name="type" className="" value={scheduleType}
+                            <input type="radio" name="type" className=""  checked={scheduleType === "NORMAL"}
                                 onChange={() => setScheduleType("NORMAL")} />
                             <label htmlFor="일반"> 일반 </label>
                         </div>
                         <span>
-                            <input type="radio" name="type" className="" value={scheduleType}
+                            <input type="radio" name="type" className="" checked={scheduleType === "EXTRACURRICULAR"}
                                 onChange={() => setScheduleType("EXTRACURRICULAR")} />
                             <label htmlFor="비교과"> 비교과 </label>
                         </span>

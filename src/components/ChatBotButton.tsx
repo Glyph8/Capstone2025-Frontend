@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import {useRef, useState } from "react";
 import { useChatBotPageStore } from "../store/store"
 import ChatBotIcon from "@/assets/icons/ChatBotIcon3.png"
 const ChatBotButton = () => {
-    const { isChatBotOpen, openChatBotPage } = useChatBotPageStore();
+    const { openChatBotPage } = useChatBotPageStore();
     const [position, setPosition] = useState({ x: 290, y: -80 });
 
     // useRef를 사용하여 드래그 상태와 위치 정보를 관리합니다.

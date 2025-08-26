@@ -15,8 +15,8 @@ export const getCalendarApi = async (year:number, month:number) => {
 export const getDetailScheduleApi = async (scheduleId:number) => {
 
     try {
-        const response = api.getScheduleDetail(scheduleId);
-        return (await response).data.result;
+        const response = await api.getScheduleDetail(scheduleId);
+        return response.data.result;
     }
     catch(error){
         console.error("스케줄 상세 조회 api 요청 실패 : error ", error);
@@ -27,8 +27,8 @@ export const getDetailScheduleApi = async (scheduleId:number) => {
 
 export const createScheduleApi = async (newEvent: CreateScheduleRequest) => {
     try {
-        const response = api.createSchedule(newEvent)
-        return (await response).data.result;
+        const response = await api.createSchedule(newEvent)
+        return response.data.result;
     }
     catch(error){
         console.error("스케쥴 생성 api 요청 실패 : error ", error);
@@ -36,11 +36,12 @@ export const createScheduleApi = async (newEvent: CreateScheduleRequest) => {
     }
 } 
 
+// { deleteID } 처럼 객체 형태 파라미터를 받는 지 확인 후 수정
 export const deleteDetailScheduleApi = async (deleteScheduleId:number) => {
 
     try {
-        const response = api.deleteSchedule({ deleteScheduleId });
-        return (await response).data.result;
+        const response = await api.deleteSchedule({ deleteScheduleId });
+        return response.data.result;
     }
     catch(error){
         console.error("스케줄 삭제 api 요청 실패 : error ", error);

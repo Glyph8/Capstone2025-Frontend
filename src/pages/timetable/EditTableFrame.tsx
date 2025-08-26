@@ -9,7 +9,8 @@ import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
 import { useState } from "react";
 import { sendEventRequest } from "../../apis/timetable";
-import type { Event, addTimeRequest, selectedTime } from "@/types/timetable-types";
+import type { Event, AddTimeRequest, SelectedTime, Preset } from "@/types/timetable-types";
+import type { MakeMemberTimetableRequest } from "@/api/Api";
 
 const EditTableFrame = () => {
     const { selectedCell, setSelectedCell } = useSelectCellStore();
@@ -28,10 +29,9 @@ const EditTableFrame = () => {
         return `${hours}:${minutes}:00.000000`;
     }
 
-    const addEvent = ({ selectedCell, eventName, eventDetail, color }: addTimeRequest) => {
+    const addEvent = ({ selectedCell, eventName, eventDetail, color }: AddTimeRequest) => {
         // sendEventRequest(day)
-
-        const sendEvent = selectedCell.map((cell: selectedTime) => {
+        const sendEvent = selectedCell.map((cell: SelectedTime) => {
             const eventItem = {
                 // id: cell.day + '_' + cell.startTime,
                 day: cell.day,
@@ -41,7 +41,7 @@ const EditTableFrame = () => {
                 eventDetail: eventDetail,
                 color: color
             }
-            return eventItem as Event;
+            return eventItem as MakeMemberTimetableRequest;
         })
         sendEventRequest(sendEvent)
     }
@@ -103,7 +103,7 @@ const EditTableFrame = () => {
 
             <div className="flex flex-col justify-start items-center 
             w-full h-full bg-[#005B3F] rounded-tl-2xl rounded-tr-2xl pl-4 pr-4 overflow-y-scroll no-scrollbar" >
-                {presets.map((preset) => {
+                {presets.map((preset: Preset) => {
                     return <CellPreset preset={preset} />
                 })}
             </div>

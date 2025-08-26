@@ -18,18 +18,6 @@ const baseApi = new Api({
     },
     secure: true, // security가 필요한 엔드포인트에 자동 적용
 });
-// export const apiClient = axios.create({ baseURL: 'https://capstone-backend.o-r.kr' });
-
-// apiClient.interceptors.request.use((config) => {
-//     const token = localStorage.getItem("access-token");
-//     if (token) {
-//         config.headers['Authorization'] = token;
-//     }
-//     if (!token) {
-//         throw new Error("Token not found in headers");
-//     }
-//     return config;
-// });
 
 
 // 인터셉터가 적용된 이 'api' 객체를 프로젝트 전역에서 사용하도록 + 주로 사용하는 v1을 export

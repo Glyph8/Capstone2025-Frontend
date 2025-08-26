@@ -20,12 +20,14 @@ const MyPage = () => {
 
     const handleLogout = () => {
         localStorage.removeItem("access-token");
+        // 필요시, 전역 상태, 캐시, 리프레쉬 토큰도 제거
+        navigate('/auth/login');
     }
 
     return (
-        <div className="w-full h-[100vh] pb-12">
+        <div className="w-full h-dvh pb-12">
             <UpperNav text="회원정보" />
-            <div className="h-full bg-white pl-11 pr-11">
+            <div className="h-full bg-white px-11">
                 <nav className="flex flex-col justify-start items-start pt-8">
                     <div className="w-full h-12 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                         회원 정보 수정
@@ -39,14 +41,14 @@ const MyPage = () => {
                         <div className="h-14 py-2 flex justify-between items-center text-black text-base font-light font-['Pretendard'] leading-none tracking-wide">
                             학적정보 수정
                             <button onClick={handleAcademicInfo}>
-                                <img src="/icons/arrow-right.svg" />
+                                <img src="/icons/arrow-right.svg" alt="다음버튼" />
                             </button>
                         </div>
 
                         <div className="h-14 py-2 flex justify-between items-center text-black text-base font-light font-['Pretendard'] leading-none tracking-wide">
                             관심 카테고리 수정
                             <button onClick={handleInterest}>
-                                <img src="/icons/arrow-right.svg" />
+                                <img src="/icons/arrow-right.svg" alt="다음 버튼"/>
                             </button>
                         </div>
                     </div>

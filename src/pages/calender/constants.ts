@@ -1,14 +1,3 @@
-// {
-//   "result": [
-//     {
-//       "scheduleId": 1,
-//       "title": "A비교과",
-//       "scheduleType": "EXTRACURRICULAR(비교과 관련), NORMAL(일반 일정)",
-//       "startDate": "2025-07-19",
-//       "endDate": "2025-07-20"
-//     }
-//   ]
-// }
 
 import type { GetScheduleByYearAndMonthResponse, GetScheduleDetailResponse } from "@/api/Api";
 
@@ -63,6 +52,6 @@ export const dummySchedule:GetScheduleDetailResponse = {
     title: "테스트1",
     scheduleType: "EXTRACURRICULAR",
     content: "더미 컨텐츠 설명",
-    startDateTime: "2025-08-19 ",
+    startDateTime: "2025-08-19",
     endDateTime: "2025-08-19",
 }

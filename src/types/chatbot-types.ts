@@ -19,4 +19,4 @@ export interface RecommendedProgram {
     participationBenefitsAndExpectedOutcomes: string;
     process: string;
     modeOfOperation: string;
-};
+}

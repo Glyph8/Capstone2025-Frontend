@@ -7,7 +7,7 @@ export interface AddTimeTableState {
 }
 
 // 셀 클릭 시 전달할 정보를 담는 type - Event 기반으로 수정 필요.
-export interface selectedTime {
+export interface SelectedTime {
     // day: 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
     day: dayString;
     startTime: string;
@@ -16,12 +16,12 @@ export interface selectedTime {
 
 // 시간표에서 클릭한 셀들 정보를 모으는 상태
 export interface SelectedCellState {
-    selectedCell: selectedTime[];
-    setSelectedCell: (newCell: selectedTime[]) => void;
+    selectedCell: SelectedTime[];
+    setSelectedCell: (newCell: SelectedTime[]) => void;
 }
 
-export interface addTimeRequest {
-    selectedCell: selectedTime[];
+export interface AddTimeRequest {
+    selectedCell: SelectedTime[];
     eventName: string;
     eventDetail: string;
     color: string;
@@ -44,28 +44,6 @@ export interface Preset {
 export interface PresetState {
     presets: Preset[];
     setPresets: (newPresets: Preset[]) => void;
-}
-
-// 중첩 map으로 시간표 작성하는 경우 type - deprecated..
-export interface timeCell {
-    day: string; //필수, 디폴트 설정⭕
-    startTime: string;//필수, 디폴트 설정⭕
-    endTime: string;//필수, 디폴트 설정⭕
-
-    eventName: string; //옵션, 디폴트 설정❌ ""? None?
-    eventDetail: string;//옵션, 디폴트 설정❌
-    color: string; //필수, 디폴트 설정⭕ #f5f5f5
-    isSelected: boolean; //필수, 디폴트 설정⭕ false
-    isHead: boolean;
-
-    head: string; // 굳이 필요한가? 앞 셀의 endtime과 내 starttime을 비교하면 안되나.
-    // 그럼 어떻게 앞 뒤 셀이 서로 비교해볼 수 있나?
-    // map 반복할 때 앞 index를 참고?
-    // 그 경우 2번째 셀의 endTime은 뭘 가리켜야하는가?
-    // 매번 비교하는게 과연 좋은 방법인가?
-    // 그냥 isSequence, isHead 처럼 단일 셀인지 병합 셀인지 구분?
-    // 하이브리드로, 먼저 isSequence로 
-    tail: string;
 }
 
 // 베이스 시간표 위에 그려질 일정들 정보 type

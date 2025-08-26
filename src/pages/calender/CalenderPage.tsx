@@ -21,7 +21,6 @@ const CalenderPage = () => {
     const getResult = async(year:number, month:number)=>{
         return await getCalendarApi(year, month);
     }
-// GetScheduleDetailResponse
     useEffect(()=>{
         const process = async()=>{
             try{
@@ -39,9 +38,9 @@ const CalenderPage = () => {
     }, [])
 
     return (
-        <div className="flex flex-col justify-between w-full h-full overflow-y-scroll no-scrollbar">
+        <div className="flex flex-col justify-between w-full overflow-y-scroll no-scrollbar">
             <UpperNav text="2025년 1학기" />
-            <main className="py-4 px-4 mt-[57px]">
+            <main className="p-4">
                 <MainCalendar data={data} setRequestYM={setRequestYM}/>        
             </main>
         </div>

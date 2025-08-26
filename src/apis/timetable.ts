@@ -2,7 +2,7 @@ import api from "@/apis/index"
 import { useLoadTableStore } from "../store/store";
 import type { MakeMemberTimetableRequest } from "@/api/Api";
 
-export const getTimeTable = api.lookupTimetable()
+export const getTimeTable = ()=> api.lookupTimetable()
     .then((res) => {
         console.log(res);
         return res.data.result;
