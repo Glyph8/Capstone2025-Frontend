@@ -117,7 +117,7 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
     setSelectedId(id)
     setIsOpenDialog(true);
   }
-  
+
   return (
     <Card className="w-full py-4">
       <CreateScheduleDialog isOpen={isOpenDialog} setIsOpen={setIsOpenDialog} scheduleId={selectedId}/>
@@ -163,6 +163,8 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
             size="icon"
             className="size-6"
             title="Add Event"
+            // 0번 스케쥴 아이디를, 생성용으로 지정
+            onClick={()=>handleScheduleClick(0)}
           >
             <PlusIcon />
             <span className="sr-only">Add Event</span>
