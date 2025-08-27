@@ -1,20 +1,23 @@
 interface ReviewItemProps{
-
+    reviewId? : number;
+    extracurricularId?: number;
+    content? : string;
+    star?: string;
 }
 
-export const ReviewItem = ({reviewId, content, star}:ReviewItemProps) => {
-
+export const ReviewItem = ({content, star}:ReviewItemProps) => {
     return(
-        <div>
+        <div className="w-full py-2 px-4 bg-amber-700">
             <div>
                 {content}
             </div>
             <div>
                 {star}
             </div>
-            <button>
+            {/* 추후 사용자의 리뷰와 다른 사용자의 리뷰 구분해서 보여주도록 */}
+            {/* <button onClick={handleDelete}>
                 삭제 버튼
-            </button>
+            </button> */}
         </div>
     )
 }

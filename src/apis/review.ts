@@ -9,7 +9,8 @@ export const getReviewList = () => api.viewReview()
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
+            // return error
         });
 
 export const postReview = (review:CreateReviewRequest) => api.createReview(review)
@@ -19,7 +20,7 @@ export const postReview = (review:CreateReviewRequest) => api.createReview(revie
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
         });
 
 export const searchReview = (searchParam: { key: string; page?: number; size?: number; }) => api.searchReview(searchParam)
@@ -29,7 +30,7 @@ export const searchReview = (searchParam: { key: string; page?: number; size?: n
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
         });
 
 export const getMyReviewList = () => api.viewMyReview()
@@ -39,7 +40,7 @@ export const getMyReviewList = () => api.viewMyReview()
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
         });
 
 export const searchMyReview = (searchParam: { key: string; page?: number; size?: number; }) => api.searchMyReview(searchParam)
@@ -49,7 +50,7 @@ export const searchMyReview = (searchParam: { key: string; page?: number; size?:
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
         });
 
 export const deleteMyReview = (deleteReviewId: DeleteMyReviewRequest) => api.deleteMyReview(deleteReviewId)
@@ -59,5 +60,5 @@ export const deleteMyReview = (deleteReviewId: DeleteMyReviewRequest) => api.del
         })
         .catch(error => {
             console.error(error)
-            return error
+            throw new Error(error);
         });
