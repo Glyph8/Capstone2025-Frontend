@@ -38,7 +38,7 @@ const CalenderPage = () => {
     }, [])
 
     return (
-        <div className="flex flex-col justify-between w-full overflow-y-scroll no-scrollbar">
+        <div className="flex flex-col w-full h-full overflow-y-scroll no-scrollbar">
             {/* 상단바 제거하는 스타일링 고려 */}
             <UpperNav text="2025년 1학기" />
             <main className="p-4">
