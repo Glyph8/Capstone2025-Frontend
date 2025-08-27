@@ -1,7 +1,7 @@
 
 // 1. Api 클래스의 인스턴스를 먼저 생성합니다.
 
-import { Api } from "@/api/Api";
+import { Api } from "@/generated-api/Api";
 
 const baseApi = new Api({
     baseURL: 'https://capstone-backend.o-r.kr',

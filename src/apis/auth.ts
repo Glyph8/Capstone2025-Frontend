@@ -1,7 +1,6 @@
 import axios from "axios"
-
-import api from "@/apis/index"
 import type { AcademicInfo } from "@/types/auth-types";
+import api from ".";
 
 const LOGIN_API_URL = "https://capstone-backend.o-r.kr/login";
 const AUTH_MAIL_API_URL = "https://capstone-backend.o-r.kr/v1/member/auth-mail"
