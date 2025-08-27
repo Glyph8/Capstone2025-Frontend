@@ -64,10 +64,9 @@ const router = createBrowserRouter([
             },
             {
                 path: 'mypage',
-                element: <Outlet />,
                 children: [
                     {
-                        index: true,
+                        path: 'profile',
                         element: <MyPage />
                     },
                     {

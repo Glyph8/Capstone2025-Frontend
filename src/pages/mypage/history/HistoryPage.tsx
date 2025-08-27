@@ -69,12 +69,12 @@ const HistoryPage = () => {
     ]
 
     const filterdHistory = dummyHistory.filter((item) => {
-                                return item.title.includes(serachText);
-                            })
+        return item.title.includes(serachText);
+    })
     return (
         <div className="w-full h-full pb-12">
             <UpperNav text="히스토리" />
-            <div className="h-full bg-white pt-6 pl-4 pr-4 pb-11 mt-[54px]">
+            <div className="bg-white pt-6 pl-4 pr-4 pb-11">
 
                 <div className="flex px-4 py-[6px] justify-center items-center gap-1">
                     <div className="w-[40%] h-5 text-Labels-Primary text-base font-medium leading-snug">

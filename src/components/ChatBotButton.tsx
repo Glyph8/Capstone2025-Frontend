@@ -1,6 +1,7 @@
 import {useRef, useState } from "react";
 import { useChatBotPageStore } from "../store/store"
 import ChatBotIcon from "@/assets/icons/ChatBotIcon3.png"
+
 const ChatBotButton = () => {
     const { openChatBotPage } = useChatBotPageStore();
     const [position, setPosition] = useState({ x: 290, y: -80 });
