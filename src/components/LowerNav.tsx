@@ -6,7 +6,7 @@ type MenuType = 'calendar' | 'review' | 'mypage' | 'timetable';
 
 const CALENDAR_PATH = '/main/calender';
 const REVIEW_PATH = '/main/review';
-const MYPAGE_PATH = '/main/mypage';
+const MYPAGE_PATH = '/main/mypage/profile';
 const TIMETABLE_PATH = '/main/timetable'
 
 const menuMap: Record<string, MenuType> = {

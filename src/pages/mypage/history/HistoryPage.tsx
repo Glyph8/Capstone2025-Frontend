@@ -69,21 +69,20 @@ const HistoryPage = () => {
     ]
 
     const filterdHistory = dummyHistory.filter((item) => {
-                                return item.title.includes(serachText);
-                            })
-                            
+        return item.title.includes(serachText);
+    })
     return (
         <div className="w-full h-full pb-12">
             <UpperNav text="히스토리" />
-            <div className="h-full bg-white pt-11 pl-4 pr-4 pb-11">
+            <div className="bg-white pt-6 pl-4 pr-4 pb-11">
 
-                <div className="flex px-4 py-[6px] justify-center items-center">
+                <div className="flex px-4 py-[6px] justify-center items-center gap-1">
                     <div className="w-[40%] h-5 text-Labels-Primary text-base font-medium leading-snug">
                         활동 이름 검색
                     </div>
 
                     <input type="text" placeholder="활동 이름"
-                        className="w-[90%] h-8 rounded-[8px] bg-[#EEEEEF] text-center"
+                        className="w-[80%] h-8 rounded-[8px] bg-[#EEEEEF] text-center"
                         onChange={(e) => setSearchText(e.target.value)} />
                 </div>
 

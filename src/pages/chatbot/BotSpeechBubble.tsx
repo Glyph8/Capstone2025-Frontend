@@ -1,4 +1,5 @@
-import type { RecommendedProgram } from "../../types/types";
+import type { RecommendedProgram } from "@/types/chatbot-types";
+
 
 type BotSpeechBubbleProps = {
     text: string;

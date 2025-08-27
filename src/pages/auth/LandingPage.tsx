@@ -6,7 +6,7 @@ const LandingPage = () => {
     const navigate = useNavigate();
     return (
         <div className="flex flex-col justify-center items-center">
-            <div className="flex justify-center w-full h-[648px] bg-[#f5f5f5]">
+            <div className="flex justify-center w-full h-full bg-[#f5f5f5]">
                 <img src={guidePage} className="w-90 h-full object-cover object-bottom"/> 
                 </div>
             <div className="w-[66px] h-[48px] flex justify-center gap-1.5 mt-5">

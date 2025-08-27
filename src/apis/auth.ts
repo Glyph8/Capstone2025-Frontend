@@ -1,26 +1,12 @@
 import axios from "axios"
-import type { AcademicInfo } from "../types/types"
+
+import api from "@/apis/index"
+import type { AcademicInfo } from "@/types/auth-types";
+
 const LOGIN_API_URL = "https://capstone-backend.o-r.kr/login";
 const AUTH_MAIL_API_URL = "https://capstone-backend.o-r.kr/v1/member/auth-mail"
 const AUTH_CODE_API_URL = "https://capstone-backend.o-r.kr/v1/member/auth-code"
-
 const PW_API_URL = "https://capstone-backend.o-r.kr/v1/member/password"
-const INTEREST_API_URL = "/v1/member/interest"
-const STDINFO_API_URL = "/v1/member/academic-info"
-
-export const apiClient = axios.create({ baseURL: 'https://capstone-backend.o-r.kr' });
-
-apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access-token");
-    if (token) {
-        config.headers['Authorization'] = token;
-    }
-    if (!token) {
-        throw new Error("Token not found in headers");
-    }
-    return config;
-});
-
 
 export const loginRequest = (email: string, pw: string) => axios.post(LOGIN_API_URL, {
     email: email,
@@ -32,7 +18,6 @@ export const loginRequest = (email: string, pw: string) => axios.post(LOGIN_API_
     localStorage.setItem("access_token", response.headers['access_token']);
     return response.data
 })
-
 
 // 메일 인증 번호 보내기 POST - result true 받음
 export const sendMailRequest = (mailAddress: string) => axios.post(AUTH_MAIL_API_URL, {
@@ -107,7 +92,7 @@ export const enrollPW = (password: string) => axios.post(PW_API_URL, {
     );
 
 // 관심사항 입력하기 POST - result true 받음
-export const enrollInterest = (interests: string[]) => apiClient.post(INTEREST_API_URL, {
+export const enrollInterest = (interests: string[]) => api.createInterestInfo({
     interestContent: interests.join(",")
 })
     .then(response => {
@@ -123,7 +108,7 @@ export const enrollInterest = (interests: string[]) => apiClient.post(INTEREST_A
     );
 
 // 학적 정보 + 챗봇이 부를 이름 입력받기 POST - result true 받음
-export const enrollAcademicInfo = (academicInfo: AcademicInfo) => apiClient.post(STDINFO_API_URL, {
+export const enrollAcademicInfo = (academicInfo: AcademicInfo) => api.upsertAcademicInfo({
     academicStatus: academicInfo.academicStatus,
     grade: academicInfo.grade,
     college: academicInfo.college,

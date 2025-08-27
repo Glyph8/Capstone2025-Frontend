@@ -15,7 +15,7 @@ const LowerNavIcon = ({ imageOnSrc, imageOffSrc, isSelected, text }: LowerNavIco
         "캘린더" : "calender",
         "리뷰" : "review",
         "시간표" : "timetable",
-        "마이" : "mypage"
+        "마이" : "mypage/profile"
     }
 
     const handleClick = () =>{
