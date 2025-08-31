@@ -7,7 +7,7 @@ interface ReviewItemProps{
 
 export const ReviewItem = ({content, star}:ReviewItemProps) => {
     return(
-        <div className="w-full py-2 px-4 bg-amber-700">
+        <div className="w-full py-2 px-4 border-green-800 border-2 rounded-xl ">
             <div>
                 {content}
             </div>
