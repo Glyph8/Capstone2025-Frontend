@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UpperNav from "../../../components/UpperNav";
 import HistoryItem from "./HistoryItem";
+import type { ReviewResponse } from "@/generated-api/Api";
+import { getMyHistoryList } from "@/apis/mypage";
 
 const HistoryPage = () => {
     const [serachText, setSearchText] = useState("");
+    const [historyList, setHistoryList] = useState<ReviewResponse[]>([]);
 
     const dummyHistory = [
         {
@@ -67,10 +70,18 @@ const HistoryPage = () => {
             isReviewd: false
         }
     ]
+    // const filterdHistory = dummyHistory.filter((item) => {
+    //     return item.title.includes(serachText);
+    // })
 
-    const filterdHistory = dummyHistory.filter((item) => {
-        return item.title.includes(serachText);
-    })
+    useEffect(()=>{
+        const process = async () =>{
+            const response = await getMyHistoryList();
+            setHistoryList(response?.data || []);
+        }
+        process();
+    },[])
+
     return (
         <div className="w-full h-full pb-12">
             <UpperNav text="히스토리" />
@@ -88,7 +99,7 @@ const HistoryPage = () => {
 
                 <div className="overflow-y-scroll no-scrollbar">
 
-                    <div className="border-b-[0.5px] border-black py-5 mb-4">
+                    {/* <div className="border-b-[0.5px] border-black py-5 mb-4">
                         {
                             filterdHistory.length === 0 ? (
                                 <div className="px-4">
@@ -102,12 +113,12 @@ const HistoryPage = () => {
                                 })
                             )
                         }
-                    </div>
+                    </div> */}
 
                     <div>
-                        {dummyHistory.map((item) => {
+                        {historyList.map((item) => {
                             return (
-                                <HistoryItem title={item.title} isReviewed={item.isReviewd} />
+                                <HistoryItem title={item.title||""} isReviewed={!!item.star|| false} />
                             )
                         })}
                     </div>

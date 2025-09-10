@@ -10,7 +10,7 @@ import CellPreset from "./CellPreset";
 import { useState } from "react";
 import { sendEventRequest } from "../../apis/timetable";
 import type { Event, AddTimeRequest, SelectedTime, Preset } from "@/types/timetable-types";
-import type { MakeMemberTimetableRequest } from "@/api/Api";
+import type { MakeMemberTimetableRequest } from "@/generated-api/Api";
 
 const EditTableFrame = () => {
     const { selectedCell, setSelectedCell } = useSelectCellStore();

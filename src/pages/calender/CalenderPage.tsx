@@ -3,13 +3,13 @@ import MainCalendar from "./components/MainCalender"
 import { useEffect, useState } from "react"
 import { getCalendarApi } from "@/apis/calendar";
 import { dummyCalender } from "./constants";
-import type { GetScheduleByYearAndMonthResponse } from "@/api/Api";
 import type { YearMonth } from "@/types/calendar-types";
+import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
 
 const CalenderPage = () => {
     const today = new Date();  
     const nowYear = today.getFullYear();
-    const nowMonth = today.getMonth()
+    const nowMonth = today.getMonth() + 1;
 
     const [requestYM, setRequestYM] = useState<YearMonth>({
         year: nowYear,
@@ -18,13 +18,11 @@ const CalenderPage = () => {
 
     const [data, setData] = useState<GetScheduleByYearAndMonthResponse[]|undefined>([]);
 
-    const getResult = async(year:number, month:number)=>{
-        return await getCalendarApi(year, month);
-    }
     useEffect(()=>{
         const process = async()=>{
             try{
-                const result = await getResult(requestYM.year, requestYM.month );
+                const result = await getCalendarApi(requestYM.year, requestYM.month );
+                console.log("달력 데이터 로드 : ", result)
                 setData(result);
             }catch(error){
                 console.error(error);
@@ -35,7 +33,7 @@ const CalenderPage = () => {
             }
         } 
         process();
-    }, [])
+    }, [requestYM.month, requestYM.year])
 
     return (
         <div className="flex flex-col w-full h-full overflow-y-scroll no-scrollbar">

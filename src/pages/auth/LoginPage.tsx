@@ -7,24 +7,20 @@ import { loginRequest } from "../../apis/auth.ts";
 const LoginPage = () => {
     const navigate = useNavigate()
     const login = async () => {
-        await loginRequest(email, pw)
+        await loginRequest(email, password)
             .then((res) => {
                 // 에러 응답이 와도 main 진입하는 문제 해결 필요
                 console.log("로그인 성공 res : ", res);
-                navigate('/main/timetable')
+                if(res)
+                    navigate('/main/timetable')
+                else
+                    alert("로그인에서 문제 발생. 토큰 관련 오류 추정")
             })
-            .catch((err) => alert(`login 실패 Error : ${err}`));
-
-        // await testLogin(email, pw)
-        //     .then((res) => {
-        //         console.log("로그인 성공 res : ", res);
-        //         navigate('/main/timetable')
-        //     })
-        //     .catch((err) => alert(`login 실패 Error : ${err}`));
+            .catch((err) => alert(`login 실패 Error : ${err}. 입력 email : ${email} password : ${password}`));
     }
 
     const [email, setEmail] = useState("");
-    const [pw, setPw] = useState("");
+    const [password, setPassword] = useState("");
 
     return (
         <div className="w-full flex flex-col justify-start items-center">
@@ -38,8 +34,8 @@ const LoginPage = () => {
             </nav>
 
             <div className="w-full flex flex-col justify-center items-center mt-12">
-                <TextInputForm label="이메일" placeholder="konkuk@konkuk.ac.kr" isError={false} isPW={false} handleChange={setEmail} />
-                <TextInputForm label="비밀번호" placeholder="* * * *" isError={false} isPW={true} handleChange={setPw} />
+                <TextInputForm label="이메일" placeholder="konkuk@konkuk.ac.kr" isError={false} isPW={false} data={email} handleChange={setEmail} />
+                <TextInputForm label="비밀번호" placeholder="* * * *" isError={false} isPW={true} data={password} handleChange={setPassword} />
             </div>
 
 

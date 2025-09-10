@@ -4,10 +4,11 @@ type TextInputFormProps = {
     placeholder?: string;
     isError: boolean;
     isPW: boolean;
+    data: string;
     handleChange: (inputText:string)=>void;
 }
 
-const TextInputForm = ({ label, placeholder, isError, isPW, handleChange }: TextInputFormProps) => {
+const TextInputForm = ({ label, placeholder, isError, isPW, data, handleChange }: TextInputFormProps) => {
     return (
         <form>
             {/* input label */}
@@ -21,7 +22,8 @@ const TextInputForm = ({ label, placeholder, isError, isPW, handleChange }: Text
                 )
                 :
                 <input className="text-black text-sm font-medium font-['Pretendard'] leading-7" placeholder={placeholder} 
-                onChange={(e)=>handleChange(e.target.value)}/>
+                onChange={(e)=>handleChange(e.target.value)}
+                value={data}/>
             }
             {/* input 아래 초록/빨강 바 */}
             {!isError ? <div className="w-72 h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>

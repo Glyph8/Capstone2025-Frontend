@@ -32,8 +32,8 @@ const SetPassword = () => {
                     비밀번호 설정
                 </div>
 
-                <TextInputForm label="비밀번호" placeholder="" isError={false} isPW={true} handleChange={setPassword} />
-                <TextInputForm label="비밀번호 재확인" placeholder="" isError={false} isPW={true} handleChange={setRePassword} />
+                <TextInputForm label="비밀번호" placeholder="" isError={false} isPW={true} data={password} handleChange={setPassword} />
+                <TextInputForm label="비밀번호 재확인" placeholder="" isError={false} isPW={true} data={rePasswword} handleChange={setRePassword} />
             </div>
             <WideAcceptButton text="계속하기" isClickable={password === rePasswword} handleClick={() => confirmPW(password)} />
 

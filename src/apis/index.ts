@@ -6,7 +6,7 @@ import { Api } from "@/generated-api/Api";
 const baseApi = new Api({
     baseURL: 'https://capstone-backend.o-r.kr',
     securityWorker: () => {
-        const token = localStorage.getItem("access-token");
+        const token = localStorage.getItem("access_token");
         if (!token) {
             throw new Error("Token not found");
         }

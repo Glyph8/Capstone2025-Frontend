@@ -1,13 +1,17 @@
 interface ReviewItemProps{
     reviewId? : number;
     extracurricularId?: number;
+    title?: string;
     content? : string;
     star?: string;
 }
 
-export const ReviewItem = ({content, star}:ReviewItemProps) => {
+export const ReviewItem = ({title, content, star}:ReviewItemProps) => {
     return(
         <div className="w-full py-2 px-4 border-green-800 border-2 rounded-xl ">
+            <div>
+                {title}
+            </div>
             <div>
                 {content}
             </div>

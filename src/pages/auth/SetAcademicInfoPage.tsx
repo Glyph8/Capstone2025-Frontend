@@ -3,8 +3,9 @@ import WideAcceptButton from "../../components/WideAcceptButton";
 import SelectItemButton from "../../components/SelectItemButton";
 import TextInputForm from "../../components/TextInputForm";
 import { enrollAcademicInfo } from "../../apis/auth";
-import type { AcademicInfo } from "../../types/types";
+
 import { useNavigate } from "react-router-dom";
+import type { AcademicInfo } from "@/types/auth-types";
 
 const SetAcademicInfoPage = () => {
     const navigate = useNavigate()
@@ -34,7 +35,6 @@ const SetAcademicInfoPage = () => {
             alert("compleSign 요청 에러 발생")
         }
     }
-
 
     return (
         <div className="flex flex-col justify-between items-center ml-auto mr-auto">
@@ -66,21 +66,21 @@ const SetAcademicInfoPage = () => {
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     단과 대학
                 </div>
-                <TextInputForm label="소속 단과대학을 입력해주세요" placeholder="예 : 공과대학" isError={false} isPW={false} handleChange={setUserCollege} />
+                <TextInputForm label="소속 단과대학을 입력해주세요" placeholder="예 : 공과대학" isError={false} isPW={false} data={userCollege} handleChange={setUserCollege} />
             </div>
 
             <div className="w-full mt-9">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     학과
                 </div>
-                <TextInputForm label="소속 학과를 입력해주세요" placeholder="예: 컴퓨터공학부" isError={false} isPW={false} handleChange={setUserDepartment} />
+                <TextInputForm label="소속 학과를 입력해주세요" placeholder="예: 컴퓨터공학부" isError={false} isPW={false} data={userDepartment} handleChange={setUserDepartment} />
             </div>
 
             <div className="w-full mt-9">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     이름
                 </div>
-                <TextInputForm label="챗봇에게 불릴 이름을 입력해주세요." placeholder="예: 김건국" isError={false} isPW={false} handleChange={setUserName} />
+                <TextInputForm label="챗봇에게 불릴 이름을 입력해주세요." placeholder="예: 김건국" isError={false} isPW={false} data={userName} handleChange={setUserName} />
             </div>
 
             <div className="absolute bottom-22">

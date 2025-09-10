@@ -1,10 +1,11 @@
-import type { RecommendedProgram } from "@/types/chatbot-types";
+import type { Program } from "@/generated-api/Api";
+// import type { RecommendedProgram } from "@/types/chatbot-types";
 
 
 type BotSpeechBubbleProps = {
     text: string;
   
-    recommendedProgramList?: RecommendedProgram[];
+    recommendedProgramList?: Program[];
 };
 
 const BotSpeechBubble = ({ text, recommendedProgramList }: BotSpeechBubbleProps) => {

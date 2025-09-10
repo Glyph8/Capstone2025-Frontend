@@ -1,5 +1,6 @@
+import type { ChatBotPageState } from '@/types/chatbot-types';
+import type { AddTimeTableState, SelectedCellState, PresetState, LoadTableState } from '@/types/timetable-types';
 import { create } from 'zustand'
-import type { AddTimeTableState, ChatBotPageState, LoadTableState, PresetState, SelectedCellState } from '../types/types';
 
 
 export const useChatBotPageStore = create<ChatBotPageState>()((set) => ({
@@ -57,36 +58,36 @@ export const usePresetStore = create<PresetState>()((set) => ({
 export const useLoadTableStore = create<LoadTableState>()((set) => ({
     // 현재 더미 데이터
     loadTable: [
-        {
-            id: 'event-1',
-            day: 'MON',
-            startTime: '11:00',
-            endTime: '1230',
-            eventName: '주간 회의',
-            eventDetail: '팀 전체 주간 목표 공유',
-            color: '#D1E7DD', // 연한 녹색
-        },
-        {
-            id: 'event-2',
-            day: 'WED',
-            startTime: '0900',
-            endTime: '1030',
-            eventName: '디자인 리뷰',
-            eventDetail: '새로운 기능 UI/UX 검토fefaafaefaefefe',
-            color: '#CFE2FF', // 연한 파랑
-        },
-        {
-            id: 'event-3',
-            day: 'FRI',
-            startTime: '1300',
-            endTime: '1430',
-            eventName: '개인 프로젝트',
-            eventDetail: '',
-            color: '#FFF3CD', // 연한 노랑
-        },
+        // {
+        //     id: 'event-1',
+        //     day: 'MON',
+        //     startTime: '11:00',
+        //     endTime: '1230',
+        //     eventName: '주간 회의',
+        //     eventDetail: '팀 전체 주간 목표 공유',
+        //     color: '#D1E7DD', // 연한 녹색
+        // },
+        // {
+        //     id: 'event-2',
+        //     day: 'WED',
+        //     startTime: '0900',
+        //     endTime: '1030',
+        //     eventName: '디자인 리뷰',
+        //     eventDetail: '새로운 기능 UI/UX 검토fefaafaefaefefe',
+        //     color: '#CFE2FF', // 연한 파랑
+        // },
+        // {
+        //     id: 'event-3',
+        //     day: 'FRI',
+        //     startTime: '1300',
+        //     endTime: '1430',
+        //     eventName: '개인 프로젝트',
+        //     eventDetail: '',
+        //     color: '#FFF3CD', // 연한 노랑
+        // },
     ],
-    setLoadTable: () => set(state => ({
-        loadTable: state.loadTable
+    setLoadTable: (tables) => set(() => ({
+        loadTable: [...tables]
     })),
 
     addNewLoadTable: (newEvent) => set((state) => ({

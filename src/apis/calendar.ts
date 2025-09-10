@@ -1,8 +1,9 @@
-import type { CreateScheduleRequest } from "@/api/Api";
 import api from "@/apis/index"
+import type { CreateScheduleRequest } from "@/generated-api/Api";
 
 export const getCalendarApi = async (year:number, month:number) => {
     try {
+        console.log(year, "년, " ,month , "월 캘린더 요청");
         const response = api.getScheduleByYearAndMonth(year, month);
         return (await response).data.result;
     }

@@ -1,10 +1,10 @@
 import api from "@/apis/index"
 import { useLoadTableStore } from "../store/store";
-import type { MakeMemberTimetableRequest } from "@/api/Api";
+import type { MakeMemberTimetableRequest } from "@/generated-api/Api";
 
 export const getTimeTable = ()=> api.lookupTimetable()
     .then((res) => {
-        console.log(res);
+        console.log("시간표 조회 api", res);
         return res.data.result;
     })
     .catch((err) => console.error(err));
