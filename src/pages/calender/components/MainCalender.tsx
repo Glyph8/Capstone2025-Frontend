@@ -40,7 +40,7 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
       return (
         <div
           key={`event-${event.scheduleId ?? Math.random()}`}
-          className={`bg-muted ${typeBarColor} relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}
+          className={`bg-muted ${typeBarColor} mb-2 relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}
           onClick={() => handleScheduleClick(event.scheduleId ?? -1)}
         >
           <div className="flex justify-between font-medium">
@@ -60,32 +60,23 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
       return <span>일정 데이터 로드 오류</span>;
     }
   };
-  const stringToDate = (stringDate: number[]) => {
-    // console.log("@@@", stringDate, Array.isArray(stringDate), typeof stringDate[0]);
-    // console.log("!!!",today.getDate().toString())
-    // const [year, month, day] = stringDate.split("-").map(Number);
+   const stringToDate = (stringDate: string) => {
+    return new Date(stringDate);
+  }
 
-    if (stringDate) {
-      const [year, month, day] = stringDate;
-      return new Date(year, month - 1, day);
-    }
-    return today
-  };
-
-  // const isInRange = (event: GetScheduleByYearAndMonthResponse) => {
-    const isInRange = (event: any) => {
+  const isInRange = (event: GetScheduleByYearAndMonthResponse) => {
+    // const isInRange = (event: unknown) => {
     // event의 start, endDateTime이 undifined라면 오늘 날짜정보로 대체
     return (
-      date &&
-      stringToDate(event.startDateTime) <=
-        date &&
+      date && event.startDateTime && stringToDate(event.startDateTime) <=
+        date && event.endDateTime && 
       stringToDate(event.endDateTime) >= date
     );
   };
 
   const isInData = (year: number, month: number, day: number) => {
     const comp = new Date(year, month, day);
-    const filtered = (data ?? []).filter((d:any) => {
+    const filtered = (data ?? []).filter((d) => {
       if (d.startDateTime && d.endDateTime) {
         return (
           date &&
@@ -191,9 +182,11 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
             <span className="sr-only">Add Event</span>
           </Button>
         </div>
-        <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full flex-col">
           {(data ?? []).map((event) => (
-            <>{isInRange(event) ? showEvent(event) : null}</>
+            <div className="h-fit" key={event.scheduleId}>
+              {isInRange(event) ? showEvent(event) : null}
+            </div>
           ))}
         </div>
       </CardFooter>
