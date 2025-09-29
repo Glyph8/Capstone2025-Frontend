@@ -1,6 +1,6 @@
 import api from "@/apis/index"
-import { useLoadTableStore } from "../store/store";
-import type { MakeMemberTimetableRequest } from "@/generated-api/Api";
+// import { useLoadTableStore } from "../store/store";
+import type { ChangeTimetableRequest, DeleteScheduleRequest, DeleteTimetableRequest, MakeMemberTimetableRequest } from "@/generated-api/Api";
 
 export const getTimeTable = ()=> api.lookupTimetable()
     .then((res) => {
@@ -17,6 +17,20 @@ export const sendEventRequest = (events:  MakeMemberTimetableRequest[]) => api.m
     .then(response => console.log("sendEventRequest 성공", response.data))
     .catch(error => console.error(error));
 
+
+export const patchEvent = (ChangedEvent:ChangeTimetableRequest) => api.changeTimetable(ChangedEvent).then((res) => {
+        console.log("시간표 내 이벤트 변경 api", res);
+        return res.data.result; //boolean 값
+    })
+
+
+export const deleteEvent = (deleteTimetableId: number) => api.deleteTimetable({deleteTimetableId}).then((res) => {
+// export const deleteEvent = (EventId:DeleteTimetableRequest) => api.deleteTimetable(EventId).then((res) => {
+        console.log("시간표 내 스케쥴 삭제 api", res);
+        return res.data.result; //boolean 값
+    })
+    .catch((err) => console.error(err));
+
 // [
 //     {
 //         "day": "MON / TUE / WED / THU / FRI / SAT / SUN",
@@ -28,7 +42,7 @@ export const sendEventRequest = (events:  MakeMemberTimetableRequest[]) => api.m
 //     }
 // ] 
 
-export const sendDummyEventRequest = (event: Event) => {
-    const { addNewLoadTable } = useLoadTableStore.getState()
-    addNewLoadTable(event)
-}
+// export const sendDummyEventRequest = (event: Event) => {
+//     const { addNewLoadTable } = useLoadTableStore.getState()
+//     addNewLoadTable(event)
+// }

@@ -3,7 +3,7 @@ import LowerNav from "../components/LowerNav.tsx";
 import ChatBotButton from "../components/ChatBotButton.tsx";
 import ChatBotFrame from "../pages/chatbot/ChatBotFrame.tsx";
 import { useChatBotPageStore, useAddTimeTableStore } from "../store/store.ts";
-import EditTableFrame from "../pages/timetable/EditTableFrame.tsx";
+import EditTableFrame from "../pages/timetable/components/EditTableFrame.tsx";
 
 const MainLayout = () => {
     const { isChatBotOpen } = useChatBotPageStore();

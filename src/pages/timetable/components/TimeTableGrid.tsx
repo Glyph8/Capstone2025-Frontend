@@ -3,10 +3,12 @@ import {
   useAddTimeTableStore,
   useSelectCellStore,
   useLoadTableStore,
-} from "../../store/store";
+} from "../../../store/store";
 
-import { getTimeTable } from "../../apis/timetable";
-import type { dayString, Event } from "@/types/timetable-types";
+import { deleteEvent, getTimeTable } from "../../../apis/timetable";
+import type { dayString } from "@/types/timetable-types";
+import type { LocalTime, LookupTimetableResponse } from "@/generated-api/Api";
+import { timeToMinutes } from "@/utils/timetableUtils";
 
 // --- 헬퍼 상수 및 함수 ---
 const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => {
@@ -15,7 +17,7 @@ const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => {
   const minute = i % 2 === 0 ? "00" : "30";
   return `${hour}${minute}`;
 });
-const DAY_TO_COL = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6, SUN: 7 };
+const DAY_TO_COL = { "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6, "SUN": 7 };
 
 /*
  * 이벤트 시간 <-> Grid Row 변환 로직 검토 및 확정
@@ -25,46 +27,62 @@ const DAY_TO_COL = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6, SUN: 7 };
  * 예: 09:00 ~ 10:30 이벤트는 1번 라인에서 시작하여 4번 라인(10:30 시작) 직전까지 차지합니다. (grid-row: 1 / 4)
  */
 //1400
-const timeToGridRow = (time: number[]) => {
-    const hour = time[0]; //14
-    const minute = time[1]; //00
+const timeToGridRow = (time: LocalTime | undefined) => {
+  if (time) {
+    const hour = time.hour ?? 9; // 기본값 9시
+    const minute = time.minute ?? 0; // 기본값 0분
     return (hour - 9) * 2 + (minute === 30 ? 1 : 0) + 1;
+  }
 };
 
-const formatTime = (time: number[]) => {
-    if(time[1] === 0)
-        return `${time[0]}:${time[1]}0`;
-    return `${time[0]}:${time[1]}`;
-//   return time[0].toString() + ":" + time[1].toString();
+const formatTime = (time: LocalTime|undefined) => {
+  if (time) {
+  const hour = time.hour ?? 0;
+  const minute = time.minute ?? 0;
+  // return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  return `${hour}:${minute}`;
+  }
 };
 const formatHour = (time: string) => `${parseInt(time.substring(0, 2), 10)}시`;
 
 const TimeTableGrid = () => {
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<number | null | undefined>(null);
   const { isEditing } = useAddTimeTableStore();
-  const { selectedCell, setSelectedCell } = useSelectCellStore();
+  const { selectedCell, updateCell } = useSelectCellStore();
   const { loadTable, setLoadTable } = useLoadTableStore();
 
   const loadTimeTable = async () => {
     try {
       const tableData = await getTimeTable();
       console.log("시간표 불러오기 성공 : ", tableData);
-      setLoadTable(tableData);
+      setLoadTable(tableData || []);
       console.log("현재 렌더링할 이벤트 목록", loadTable);
-      return tableData;
     } catch (error) {
       console.error("시간표 불러오기 실패", error);
       return error;
     }
   };
 
-  const checkIsSelect = (halfHour: string, day: dayString) => {
+  const checkIsSelect = (halfHour: LocalTime|undefined, day: dayString|undefined) => {
     return selectedCell.some((c) => c.startTime === halfHour && c.day === day);
   };
 
+const hhmmStringToLocalTime = (timeString: string): LocalTime => {
+  // 1. 문자열을 2글자씩 자릅니다.
+  const hourStr = timeString.substring(0, 2);   // 0번째부터 2번째 직전까지 -> "12"
+  const minuteStr = timeString.substring(2, 4); // 2번째부터 4번째 직전까지 -> "30"
+
+  // 2. 잘라낸 문자열을 숫자로 변환합니다.
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+
+  // 3. LocalTime 객체로 반환합니다.
+  return { hour:hour, minute:minute };
+}
+
   const handleVoidClick = (
-    startTime: string,
-    endTime: string,
+    startTime: LocalTime,
+    endTime: LocalTime,
     day: dayString
   ) => {
     if (isEditing) {
@@ -76,22 +94,25 @@ const TimeTableGrid = () => {
         day: day,
       };
 
-      if (checkIsSelect(startTime, day)) {
-        const removedCell = selectedCell.filter(
-          (c) => !(c.startTime === cell.startTime && c.day === cell.day)
-        );
-        setSelectedCell(removedCell);
-      } else {
-        setSelectedCell([...selectedCell, cell]);
-      }
+      updateCell(cell)
+
+      // if (checkIsSelect(startTime, day)) {
+      //   const removedCell:MakeMemberTimetableRequest[] = selectedCell.filter(
+      //     (c) => !(c.startTime === cell.startTime && c.day === cell.day)
+      //   );
+      //   setSelectedCell(removedCell);
+      // } else {
+      //   setSelectedCell([...selectedCell, cell]);
+      // }
+
     } else {
       return;
     }
   };
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: LookupTimetableResponse) => {
     // const handleEventClick = (eventId: string) => {
-    setSelectedEventId((prevId) => (prevId === event.id ? null : event.id));
+    setSelectedEventId((prev) => (prev === event.id ? null : event.id));
     if (isEditing) {
       console.log(`선택된 셀 : ${event.startTime}/${event.day}`);
       const cell = {
@@ -99,14 +120,18 @@ const TimeTableGrid = () => {
         endTime: event.endTime,
         day: event.day,
       };
-      if (checkIsSelect(event.startTime, event.day)) {
-        const removedCell = selectedCell.filter(
-          (c) => !(c.startTime === cell.startTime && c.day === cell.day)
-        );
-        setSelectedCell(removedCell);
-      } else {
-        setSelectedCell([...selectedCell, cell]);
-      }
+      if(event.id)
+        deleteEvent(event.id);
+      // 지우는 로직 추가
+      // if (checkIsSelect(event.startTime, event.day)) {
+      //   const removedCell = selectedCell.filter(
+      //     (c) => !(c.startTime === cell.startTime && c.day === cell.day)
+      //   );
+      //   setSelectedCell(removedCell);
+      // } else {
+      //   setSelectedCell([...selectedCell, cell]);
+      // }
+
     } else {
       return;
     }
@@ -141,7 +166,8 @@ const TimeTableGrid = () => {
             key={`${time}-${day}`}
             onClick={() => {
               console.log(day);
-              handleVoidClick(time, TIME_SLOTS[rowIndex + 1], day as dayString);
+              handleVoidClick(hhmmStringToLocalTime(time), hhmmStringToLocalTime(TIME_SLOTS[rowIndex + 1]), day as dayString);
+              // handleVoidClick(time, TIME_SLOTS[rowIndex + 1], day as dayString);
             }}
             style={{
               backgroundColor: "#f5f5f5",
@@ -173,11 +199,14 @@ const TimeTableGrid = () => {
       })}
 
       {/* --- 3. 이벤트 블록 렌더링 --- */}
-      {loadTable.map((event) => {
+      {loadTable.map((event:LookupTimetableResponse) => {
         // {events.map((event) => {
+        if (!event.day || !(event.day in DAY_TO_COL)) {
+          return null;
+        }
         const gridRowStart = timeToGridRow(event.startTime);
         const gridRowEnd = timeToGridRow(event.endTime);
-        const gridColumn = DAY_TO_COL[event.day];
+        const gridColumn = DAY_TO_COL[event.day as keyof typeof DAY_TO_COL];
         const isSelected = selectedEventId === event.id;
         return (
           <div
@@ -196,13 +225,39 @@ const TimeTableGrid = () => {
             }}
           >
             <div className="flex-grow">
+              <p>id : {event.id}</p>
               <p className="font-bold text-[10px]">{event.eventName}</p>
               <p className="text-[8px]">{event.eventDetail}</p>
             </div>
             <div className="text-right text-xs mt-auto">
-              {formatTime(event.endTime)}
+              {formatTime(event.startTime)}
+              {event.startTime?.hour} : {event.startTime?.minute}
             </div>
           </div>
+        );
+      })}
+
+{/* 체크한 셀 표시 */}
+         {selectedCell.map((cell) => {
+        if (!cell.day || !(cell.day in DAY_TO_COL)) {
+          return null;
+        }
+        const gridRowStart = timeToGridRow(cell.startTime);
+        const gridRowEnd = timeToGridRow(cell.endTime);
+        const gridColumn = DAY_TO_COL[cell.day as keyof typeof DAY_TO_COL];
+
+        return (
+          <div
+            // selectedCell에는 고유 id가 없을 수 있으므로, 인덱스나 다른 고유값으로 key를 설정
+            key={`selected-${cell.day}-${timeToMinutes(cell.startTime)}`}
+            className="w-full rounded-lg pointer-events-none" // 클릭 이벤트를 막아 배경 셀이 클릭되도록 함
+            style={{
+              gridRow: `${gridRowStart} / ${gridRowEnd}`,
+              gridColumn: gridColumn,
+              backgroundColor: "rgba(59, 130, 246, 0.3)", // 반투명 파란색 배경
+              zIndex: 0, // 이벤트(z-index: 1)보다 아래에 위치
+            }}
+          ></div>
         );
       })}
     </div>

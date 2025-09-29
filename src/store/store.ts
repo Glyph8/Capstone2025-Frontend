@@ -1,5 +1,7 @@
+import type { MakeMemberTimetableRequest } from '@/generated-api/Api';
 import type { ChatBotPageState } from '@/types/chatbot-types';
-import type { AddTimeTableState, SelectedCellState, PresetState, LoadTableState } from '@/types/timetable-types';
+import type { AddTimeTableState, PresetState, LoadTableState} from '@/types/timetable-types';
+import { updateTimetable } from '@/utils/timetableUtils';
 import { create } from 'zustand'
 
 
@@ -14,11 +16,22 @@ export const useAddTimeTableStore = create<AddTimeTableState>()((set) => ({
 }));
 
 
+export interface SelectedCellState {
+    selectedCell: MakeMemberTimetableRequest[];
+    // 여러 셀을 한번에 추가/제거하는 대신, 하나씩 처리하는 액션으로 변경하는 것이 좋습니다.
+    updateCell: (cell: MakeMemberTimetableRequest) => void;
+    clearCells: () => void;
+}
+
 export const useSelectCellStore = create<SelectedCellState>()((set) => ({
     selectedCell: [],
-    setSelectedCell: (newCell) => set(() => ({
-        selectedCell: newCell
-    }))
+    // setSelectedCell: (newCell: MakeMemberTimetableRequest[]) => set((state) => {})
+     updateCell: (cellToUpdate: MakeMemberTimetableRequest) => set((state: { selectedCell: MakeMemberTimetableRequest[]; }) => ({
+        selectedCell: updateTimetable(state.selectedCell, cellToUpdate)
+    })),
+     clearCells: () => set({
+        selectedCell: [] // 그냥 selectedCell을 빈 배열로 교체
+    }),
 }));
 
 
