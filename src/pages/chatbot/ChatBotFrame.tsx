@@ -12,12 +12,6 @@ const ChatBotFrame = () => {
 
   const [contexts, setContexts] = useState<ContextType[]>([]);
 
-  // const makeString = (result: { answer: string; recommendedProgramList: { title: string; }[]; }) => {
-  //     const stringedAns = result.answer + '\n' + result.recommendedProgramList[0].title
-  //     return stringedAns
-  // }
-  // setContexts([...contexts, userQuestion, makeString(sendQuestionDummy(userQuestion))]);
-
   const handleUserQuestion = async () => {
     const trimmed = userQuestion.trim();
     if (!trimmed) return;
@@ -25,11 +19,11 @@ const ChatBotFrame = () => {
     // const botResponse = sendQuestionDummy(trimmed);
     const botResponse = await sendUserQuestion(trimmed);
 
-    if (botResponse?.answer && botResponse.recommendedProgramList) {
+    if (botResponse?.answer && botResponse.sources) {
       const botContext: ContextType = {
         type: "bot",
         answer: botResponse.answer,
-        recommendedProgramList: botResponse.recommendedProgramList,
+        recommendedProgramList: botResponse.sources,
       };
       setContexts((prev) => [...prev, userContext, botContext]);
       setUserQuestion("");
@@ -103,7 +97,6 @@ const ChatBotFrame = () => {
               className="w-6 h-6"
               onClick={() => {
                 handleUserQuestion();
-                // setContexts([...contexts, userQuestion, makeString(sendQuestionDummy(userQuestion))]);
               }}
             >
               <img className="w-6 h-6" src="/icons/blue-sending-icon.svg" />
