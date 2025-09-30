@@ -4,7 +4,7 @@ import UpperNav from "../components/UpperNav";
 const AuthLayout = () => {
     const location = useLocation();
     return (
-        <div className="max-w-400 mx-auto h-dvh">
+        <div className="flex flex-col max-w-200 mx-auto h-dvh">
             {location.pathname === "/auth" ? (
                 null
             ) : (

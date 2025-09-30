@@ -25,7 +25,7 @@ baseApi.instance.interceptors.response.use(
     (error) => {
         // error.response가 존재하고, status 코드가 401일 때
         if (error.response?.status === 401 || error.response?.status === 403) {
-            console.error("인증 에러! 로그인이 필요합니다.");
+            // console.error("인증 에러! 로그인이 필요합니다.");
 
             // // 기존 토큰을 삭제합니다.
             // localStorage.removeItem("access_token");

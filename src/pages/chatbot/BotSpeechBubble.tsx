@@ -1,32 +1,21 @@
 import type { Program } from "@/generated-api/Api";
-// import type { RecommendedProgram } from "@/types/chatbot-types";
-
 
 type BotSpeechBubbleProps = {
     text: string;
-  
     recommendedProgramList?: Program[];
 };
 
 const BotSpeechBubble = ({ text, recommendedProgramList }: BotSpeechBubbleProps) => {
     return (
-        <div className="flex flex-col w-[90%] justify-start bg-[#FCFFFF] rounded-tr-[50px] rounded-br-[50px] p-4 space-y-3 shadow-md">
+        <div className="flex flex-col w-[90%] justify-start bg-[#FCFFFF] rounded-l-xl rounded-tr-[50px] rounded-br-[50px] p-4 space-y-3 shadow-md">
             <div className="text-sm whitespace-pre-line">{text}</div>
 
             {recommendedProgramList?.map((program, idx) => (
                 <div key={idx} className="bg-[#F0F4F8] p-3 rounded-lg space-y-1 text-sm">
                     <div className="font-semibold">{program.title}</div>
                     <a href={program.url} className="text-blue-600 underline" target="_blank">
-                        프로그램 링크
+                        프로그램 위인전 링크
                     </a>
-                    <div>{program.applicationPeriod}</div>
-                    <div>{program.duration}</div>
-                    <div>{program.targetAudience}</div>
-                    <div>{program.selectionMethod}</div>
-                    <div>{program.purposeOfTheActivity}</div>
-                    <div>{program.participationBenefitsAndExpectedOutcomes}</div>
-                    <div>{program.process}</div>
-                    <div>{program.modeOfOperation}</div>
                 </div>
             ))}
         </div>

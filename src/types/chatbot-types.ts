@@ -8,18 +8,6 @@ export interface ChatBotPageState {
 
 export type ContextType =
     | { type: 'user'; message: string }
-    | { type: 'bot'; answer: string; recommendedProgramList?: Program[] };
-
-export interface RecommendedProgram {
-    title: string;
-    url: string;
-    applicationPeriod: string;
-    targetAudience: string;
-    selectionMethod: string;
-    duration: string;
-    purposeOfTheActivity: string;
-    participationBenefitsAndExpectedOutcomes: string;
-    process: string;
-    modeOfOperation: string;
-}
+    | { type: 'bot'; answer: string; recommendedProgramList?: Program[] }
+    | {type: 'loading';}
 

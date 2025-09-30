@@ -1,6 +1,6 @@
 import api from "@/apis/index"
 // import { useLoadTableStore } from "../store/store";
-import type { ChangeTimetableRequest, DeleteScheduleRequest, DeleteTimetableRequest, MakeMemberTimetableRequest } from "@/generated-api/Api";
+import type { ChangeTimetableRequest, MakeMemberTimetableRequest } from "@/generated-api/Api";
 
 export const getTimeTable = ()=> api.lookupTimetable()
     .then((res) => {

@@ -8,13 +8,9 @@ import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
 import { useState } from "react";
 import { sendEventRequest } from "../../../apis/timetable";
-import type {
-  AddTimeRequest,
-  Preset,
-} from "@/types/timetable-types";
-import type {
-  MakeMemberTimetableRequest,
-} from "@/generated-api/Api";
+import type { AddTimeRequest, Preset } from "@/types/timetable-types";
+import type { MakeMemberTimetableRequest } from "@/generated-api/Api";
+import { getRandomDarkHexColor } from "@/utils/randomColorUtils";
 
 const EditTableFrame = () => {
   const { selectedCell, clearCells } = useSelectCellStore();
@@ -54,10 +50,7 @@ const EditTableFrame = () => {
     >
       {/* 선택한 셀 시간 정보 + 전체 취소 버튼 */}
       {selectedCell.length === 0 ? null : (
-        <SelectedCell
-          selectedCell={selectedCell}
-          clearCells={clearCells}
-        />
+        <SelectedCell selectedCell={selectedCell} clearCells={clearCells} />
       )}
 
       <div className="flex flex-row justify-between items-center m-4 pt-2">
@@ -96,11 +89,13 @@ const EditTableFrame = () => {
           onClick={() => {
             // 연속하게 select된 셀들 단위로 반복 요청.
             // selectedCell, eventName, eventDetail, color
+            const randomColor = getRandomDarkHexColor();
+            console.log("임의 색상 : ",randomColor)
             const request = {
               selectedCell: selectedCell,
               eventName: eventName,
               eventDetail: eventDetail,
-              color: "#f2f2f2",
+              color: "#005B3F",
             };
             addEvent(request);
           }}

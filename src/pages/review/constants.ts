@@ -1,4 +1,5 @@
 import type { PageResponseReviewResponse } from "@/generated-api/Api";
+import type { RatingValue } from "@/types/review-types";
 
 export const dummyReviewList : PageResponseReviewResponse = {
     data: [
@@ -30,3 +31,11 @@ export const dummyReviewList : PageResponseReviewResponse = {
     "totalPages": 1,
     "isLastPage": true
 }
+
+export const RATING_MAP: { [key in RatingValue]: number } = {
+  "ONE": 1,
+  "TWO": 2,
+  "THREE": 3,
+  "FOUR": 4,
+  "FIVE": 5,
+};

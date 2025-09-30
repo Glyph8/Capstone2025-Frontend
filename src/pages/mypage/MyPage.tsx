@@ -4,6 +4,13 @@ import WideAcceptButton from "../../components/WideAcceptButton";
 import { useEffect, useState } from "react";
 import { getMyInfo } from "@/apis/mypage";
 import type { LookupMemberInfoResponse } from "@/generated-api/Api";
+import type { AcademicStatus, KoreanAcademicStatus } from "@/types/mypage-types";
+
+const ACADEMIC_STATUS_MAP: Record<AcademicStatus, KoreanAcademicStatus> = {
+  ENROLLED: "재학",
+  LEAVE_OF_ABSENCE: "휴학",
+  GRADUATED: "졸업",
+};
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -60,7 +67,7 @@ const MyPage = () => {
           </div>
 
           <div className="w-full flex flex-col gap-2">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 pb-3">
               <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
                 이름 : {profile.name}
               </div>
@@ -77,7 +84,7 @@ const MyPage = () => {
                 학년 : {profile.grade}
               </div>
               <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                현재 학적 : {profile.academicStatus}
+                현재 학적 : {ACADEMIC_STATUS_MAP[profile.academicStatus ?? "ENROLLED"]}
               </div>
             </div>
 

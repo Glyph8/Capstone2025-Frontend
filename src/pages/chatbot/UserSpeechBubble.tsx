@@ -1,19 +1,15 @@
-
 type UserSpeechBubbleProps = {
-    text: string;
-}
+  text: string;
+};
 
 const UserSpeechBubble = ({ text }: UserSpeechBubbleProps) => {
-
-    return (
-        <div className="flex flex-col w-full items-end">
-            <div className="w-[90%] min-h-16 bg-[#FCFFFF] rounded-tl-[50px] rounded-bl-[50px] p-3">
-                <div>
-                    {text}
-                </div>
-            </div>
-        </div>
-    )
-}
+  return (
+    <div className="flex justify-end">
+      <div className="bg-blue-500 text-white rounded-xl rounded-br-lg px-4 py-2 max-w-xs lg:max-w-md">
+        {text}
+      </div>
+    </div>
+  );
+};
 
 export default UserSpeechBubble;

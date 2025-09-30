@@ -12,15 +12,28 @@ import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
 interface MainCalendarProps {
   data?: GetScheduleByYearAndMonthResponse[];
   setRequestYM: React.Dispatch<React.SetStateAction<YearMonth>>;
+  onScheduleChange: () => void;
 }
 
-const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
+const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProps) => {
   const today = new Date();
   const [date, setDate] = useState<Date | undefined>(
     new Date(today.getFullYear(), today.getMonth(), today.getDate())
   );
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(-1);
+
+  const formatKoreanDateTimeNative = (isoString: string): string => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    // getMonth()는 0부터 시작하므로 (0=1월, 1=2월, ...) +1을 해줘야 합니다. (매우 중요!)
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${year}년 ${month}월 ${day}일 ${hours}시:${minutes}분`;
+  };
 
   const showEvent = (event: GetScheduleByYearAndMonthResponse) => {
     if (event) {
@@ -52,7 +65,7 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
             </span>
           </div>
           <div className="text-muted-foreground text-xs">
-            {event.startDateTime} 부터 ~{event.endDateTime} 까지
+            {formatKoreanDateTimeNative(event.startDateTime ?? "")} 부터 ~{formatKoreanDateTimeNative(event.endDateTime ?? "")} 까지
           </div>
         </div>
       );
@@ -60,16 +73,18 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
       return <span>일정 데이터 로드 오류</span>;
     }
   };
-   const stringToDate = (stringDate: string) => {
+  const stringToDate = (stringDate: string) => {
     return new Date(stringDate);
-  }
+  };
 
   const isInRange = (event: GetScheduleByYearAndMonthResponse) => {
     // const isInRange = (event: unknown) => {
     // event의 start, endDateTime이 undifined라면 오늘 날짜정보로 대체
     return (
-      date && event.startDateTime && stringToDate(event.startDateTime) <=
-        date && event.endDateTime && 
+      date &&
+      event.startDateTime &&
+      stringToDate(event.startDateTime) <= date &&
+      event.endDateTime &&
       stringToDate(event.endDateTime) >= date
     );
   };
@@ -126,6 +141,7 @@ const MainCalendar = ({ data, setRequestYM }: MainCalendarProps) => {
           isOpen={isOpenDialog}
           setIsOpen={setIsOpenDialog}
           scheduleId={selectedId}
+          onSuccess={onScheduleChange}
         />
       )}
       <CardContent className="px-4">

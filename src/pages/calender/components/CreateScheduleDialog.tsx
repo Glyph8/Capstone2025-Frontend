@@ -1,16 +1,19 @@
-import { createScheduleApi, getDetailScheduleApi } from "@/apis/calendar";
+import {
+  createScheduleApi,
+  getDetailScheduleApi,
+  patchScheduleApi,
+} from "@/apis/calendar";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import WideAcceptButton from "@/components/WideAcceptButton";
 import { useEffect, useState } from "react";
-import type {
-  GetScheduleDetailResponse,
-} from "@/generated-api/Api";
+import type { GetScheduleDetailResponse } from "@/generated-api/Api";
 
 interface CreateScheduleDialogProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   scheduleId?: number;
+  onSuccess: () => void;
 }
 
 const emptyData: GetScheduleDetailResponse = {
@@ -24,16 +27,16 @@ export const CreateScheduleDialog = ({
   isOpen,
   setIsOpen,
   scheduleId,
+   onSuccess,
 }: CreateScheduleDialogProps) => {
   const [data, setData] = useState<GetScheduleDetailResponse>(emptyData);
-  const [title, setTitle] = useState<string>("");
+  const [title, setTitle] = useState<string>(data.title ?? "");
   const [scheduleType, setScheduleType] = useState(data.scheduleType);
   const [content, setContent] = useState("");
   const [startDateTime, setStartDateTime] = useState(data.startDateTime);
   const [endDateTime, setEndDateTime] = useState(data.endDateTime);
 
   const handlePostSchedule = async () => {
-
     const newEvent = {
       title: title,
       scheduleType: scheduleType,
@@ -43,13 +46,29 @@ export const CreateScheduleDialog = ({
     };
 
     console.log("입력 : ", newEvent.title);
-    const res = await createScheduleApi(newEvent);
-    if (res) {
-      console.log("일정 추가 성공");
+
+    if (scheduleId === 0) {
+      const res = await createScheduleApi(newEvent);
+      if (res) {
+        console.log("일정 추가 성공");
+         onSuccess();
+      } else {
+        console.log("일정 추가 실패, 입력 : ", newEvent.title);
+      }
+      setIsOpen(false);
     } else {
-      console.log("일정 추가 실패, 입력 : ", newEvent.title);
+      const res = await patchScheduleApi({
+        ...newEvent,
+        scheduleId: scheduleId!,
+      });
+      if (res) {
+        console.log("일정 수정 성공");
+         onSuccess();
+      } else {
+        console.log("일정 수정 실패, 입력 : ", newEvent.title);
+      }
+      setIsOpen(false);
     }
-    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -61,8 +80,13 @@ export const CreateScheduleDialog = ({
             setData(emptyData);
           } else {
             const result = await getDetailScheduleApi(scheduleId);
-            console.log("이미 존재하는 일정 세부 조회", result)
+            console.log("이미 존재하는 일정 세부 조회", result);
             setData(result ?? emptyData);
+            setTitle(data.title ?? "");
+            setScheduleType(data.scheduleType);
+            setContent(data.content ?? "");
+            setStartDateTime(data.startDateTime);
+            setEndDateTime(data.endDateTime);
           }
         } else {
           console.error(
@@ -72,17 +96,10 @@ export const CreateScheduleDialog = ({
         }
       } catch (error) {
         console.error(error);
-        // setTitle(dummySchedule.title);
-        // setScheduleType(dummySchedule.scheduleType);
-        // setContent(dummySchedule.content);
-        // setStartDateTime(dummySchedule.startDateTime);
-        // setEndDateTime(dummySchedule.endDateTime);
-      } finally {
-        console.log("CalendarPage api finally");
       }
     };
     process();
-  }, [scheduleId]);
+  }, [data.content, data.endDateTime, data.scheduleType, data.startDateTime, data.title, scheduleId]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -167,11 +184,8 @@ export const CreateScheduleDialog = ({
           <WideAcceptButton
             text={"추가 / 수정"}
             isClickable={true}
-            handleClick={() => handlePostSchedule}
+            handleClick={handlePostSchedule}
           />
-          <button onClick={handlePostSchedule}>
-            추가
-          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
