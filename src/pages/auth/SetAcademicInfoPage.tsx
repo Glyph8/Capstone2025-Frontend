@@ -12,9 +12,9 @@ const SetAcademicInfoPage = () => {
 
     const [userAcademicStatus, setUserAcademicStatus] = useState("ENROLLED");
     const [userGrade, setUserGrade] = useState(1);
-    const [userCollege, setUserCollege] = useState('전체대학');
-    const [userDepartment, setUserDepartment] = useState('자유전공학부');
-    const [userName, setUserName] = useState('김건국');
+    const [userCollege, setUserCollege] = useState('');
+    const [userDepartment, setUserDepartment] = useState('');
+    const [userName, setUserName] = useState('');
 
     const completeSign = async () => {
         const academicInfo = {
@@ -83,7 +83,7 @@ const SetAcademicInfoPage = () => {
                 <TextInputForm label="챗봇에게 불릴 이름을 입력해주세요." placeholder="예: 김건국" isError={false} isPW={false} data={userName} handleChange={setUserName} />
             </div>
 
-            <div className="absolute bottom-22">
+            <div className="mt-6 py-5">
                 <WideAcceptButton text="가입 완료" isClickable={true} handleClick={completeSign} />
             </div>
         </div>

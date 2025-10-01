@@ -66,7 +66,7 @@ const ChatBotFrame = () => {
 
   return (
 <div
-      className="absolute bottom-0 w-full h-screen
+      className="absolute bottom-0 w-full h-full
                  flex flex-col z-20 bg-[#DDE9F6]"
     >
       <div className="flex-shrink-0">

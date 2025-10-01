@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import {
   useAddTimeTableStore,
   useSelectCellStore,
@@ -8,7 +8,11 @@ import {
 import { deleteEvent, getTimeTable } from "../../../apis/timetable";
 import type { dayString } from "@/types/timetable-types";
 import type { LocalTime, LookupTimetableResponse } from "@/generated-api/Api";
-import { timeToMinutes } from "@/utils/timetableUtils";
+import {
+  parseFormattedTimeToLocalTime,
+  timeToMinutes,
+} from "@/utils/timetableUtils";
+import EditTableDrawer from "./EditTableDrawer";
 
 // --- 헬퍼 상수 및 함수 ---
 const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => {
@@ -17,7 +21,7 @@ const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => {
   const minute = i % 2 === 0 ? "00" : "30";
   return `${hour}${minute}`;
 });
-const DAY_TO_COL = { "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6, "SUN": 7 };
+const DAY_TO_COL = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6, SUN: 7 };
 
 /*
  * 이벤트 시간 <-> Grid Row 변환 로직 검토 및 확정
@@ -27,27 +31,47 @@ const DAY_TO_COL = { "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6,
  * 예: 09:00 ~ 10:30 이벤트는 1번 라인에서 시작하여 4번 라인(10:30 시작) 직전까지 차지합니다. (grid-row: 1 / 4)
  */
 //1400
-const timeToGridRow = (time: LocalTime | undefined) => {
-  if (time) {
-    const hour = time.hour ?? 9; // 기본값 9시
-    const minute = time.minute ?? 0; // 기본값 0분
-    return (hour - 9) * 2 + (minute === 30 ? 1 : 0) + 1;
-  }
+const timeToGridRow = (time: LocalTime | undefined): number => {
+  // time이 undefined이면 time.hour는 undefined가 되고, ?? 연산자가 9를 기본값으로 사용
+  const hour = time?.hour ?? 9;
+  const minute = time?.minute ?? 0;
+
+  return (hour - 9) * 2 + (minute === 30 ? 1 : 0) + 1;
 };
 
-const formatTime = (time: LocalTime|undefined) => {
-  if (time) {
-  const hour = time.hour ?? 0;
-  const minute = time.minute ?? 0;
-  // return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-  return `${hour}:${minute}`;
+const formatToHourMinute = (timeString: string | undefined | null): string => {
+  // 1. 입력값이 없으면 빈 문자열을 반환합니다.
+  if (!timeString) {
+    return "";
+  }
+
+  try {
+    // 2. ":"를 기준으로 문자열을 자릅니다.
+    // "09:30:00.000000" -> ["09", "30", "00.000000"]
+    const [hourStr, minuteStr] = timeString.split(":");
+
+    // 3. 시간(hour) 부분의 앞에 붙은 '0'을 제거하기 위해 숫자로 변환합니다.
+    const hour = parseInt(hourStr, 10);
+
+    // 4. 변환 중 오류가 발생했는지 확인합니다.
+    if (isNaN(hour) || minuteStr === undefined) {
+      return "";
+    }
+
+    // 5. "시간:분" 형태로 조합하여 반환합니다. (예: "9:30")
+    return `${hour}:${minuteStr}`;
+  } catch (error) {
+    console.error("잘못된 형식의 시간 문자열입니다:", timeString, error);
+    return "";
   }
 };
 const formatHour = (time: string) => `${parseInt(time.substring(0, 2), 10)}시`;
 
 const TimeTableGrid = () => {
-  const [selectedEventId, setSelectedEventId] = useState<number | null | undefined>(null);
-  const { isEditing } = useAddTimeTableStore();
+  const [selectedEventId, setSelectedEventId] = useState<
+    number | null | undefined
+  >(null);
+  const { isEditing} = useAddTimeTableStore();
   const { selectedCell, updateCell } = useSelectCellStore();
   const { loadTable, setLoadTable } = useLoadTableStore();
 
@@ -63,22 +87,18 @@ const TimeTableGrid = () => {
     }
   };
 
-  const checkIsSelect = (halfHour: LocalTime|undefined, day: dayString|undefined) => {
-    return selectedCell.some((c) => c.startTime === halfHour && c.day === day);
+  const hhmmStringToLocalTime = (timeString: string): LocalTime => {
+    // 1. 문자열을 2글자씩 자릅니다.
+    const hourStr = timeString.substring(0, 2); // 0번째부터 2번째 직전까지 -> "12"
+    const minuteStr = timeString.substring(2, 4); // 2번째부터 4번째 직전까지 -> "30"
+
+    // 2. 잘라낸 문자열을 숫자로 변환합니다.
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+
+    // 3. LocalTime 객체로 반환합니다.
+    return { hour: hour, minute: minute };
   };
-
-const hhmmStringToLocalTime = (timeString: string): LocalTime => {
-  // 1. 문자열을 2글자씩 자릅니다.
-  const hourStr = timeString.substring(0, 2);   // 0번째부터 2번째 직전까지 -> "12"
-  const minuteStr = timeString.substring(2, 4); // 2번째부터 4번째 직전까지 -> "30"
-
-  // 2. 잘라낸 문자열을 숫자로 변환합니다.
-  const hour = parseInt(hourStr, 10);
-  const minute = parseInt(minuteStr, 10);
-
-  // 3. LocalTime 객체로 반환합니다.
-  return { hour:hour, minute:minute };
-}
 
   const handleVoidClick = (
     startTime: LocalTime,
@@ -93,18 +113,7 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
         endTime: endTime,
         day: day,
       };
-
-      updateCell(cell)
-
-      // if (checkIsSelect(startTime, day)) {
-      //   const removedCell:MakeMemberTimetableRequest[] = selectedCell.filter(
-      //     (c) => !(c.startTime === cell.startTime && c.day === cell.day)
-      //   );
-      //   setSelectedCell(removedCell);
-      // } else {
-      //   setSelectedCell([...selectedCell, cell]);
-      // }
-
+      updateCell(cell);
     } else {
       return;
     }
@@ -120,8 +129,9 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
         endTime: event.endTime,
         day: event.day,
       };
-      if(event.id)
+      if (event.id) 
         deleteEvent(event.id);
+      loadTimeTable();
       // 지우는 로직 추가
       // if (checkIsSelect(event.startTime, event.day)) {
       //   const removedCell = selectedCell.filter(
@@ -131,7 +141,6 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
       // } else {
       //   setSelectedCell([...selectedCell, cell]);
       // }
-
     } else {
       return;
     }
@@ -139,7 +148,7 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
 
   useEffect(() => {
     loadTimeTable();
-  }, []);
+  }, [selectedCell]);
 
   useEffect(() => {
     console.log("상태 업데이트 후 렌더링된 이벤트 목록", loadTable);
@@ -158,6 +167,11 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
         backgroundColor: "#D7D7D9", // 간격 색상
       }}
     >
+
+
+      {/* <EditTableDrawer fetchTable={loadTimeTable}/> */}
+
+
       {/* #D9D9D9 */}
       {/* --- 1. 배경 그리드 셀 렌더링 --- */}
       {TIME_SLOTS.map((time, rowIndex) =>
@@ -166,7 +180,11 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
             key={`${time}-${day}`}
             onClick={() => {
               console.log(day);
-              handleVoidClick(hhmmStringToLocalTime(time), hhmmStringToLocalTime(TIME_SLOTS[rowIndex + 1]), day as dayString);
+              handleVoidClick(
+                hhmmStringToLocalTime(time),
+                hhmmStringToLocalTime(TIME_SLOTS[rowIndex + 1]),
+                day as dayString
+              );
               // handleVoidClick(time, TIME_SLOTS[rowIndex + 1], day as dayString);
             }}
             style={{
@@ -199,13 +217,18 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
       })}
 
       {/* --- 3. 이벤트 블록 렌더링 --- */}
-      {loadTable.map((event:LookupTimetableResponse) => {
+      {loadTable.map((event: LookupTimetableResponse) => {
         // {events.map((event) => {
         if (!event.day || !(event.day in DAY_TO_COL)) {
           return null;
         }
-        const gridRowStart = timeToGridRow(event.startTime);
-        const gridRowEnd = timeToGridRow(event.endTime);
+        // 아오.. 왜 LocalTime 타입으로 생성되는지..
+        const gridRowStart = timeToGridRow(
+          parseFormattedTimeToLocalTime(event.startTime as string)
+        );
+        const gridRowEnd = timeToGridRow(
+          parseFormattedTimeToLocalTime(event.endTime as string)
+        );
         const gridColumn = DAY_TO_COL[event.day as keyof typeof DAY_TO_COL];
         const isSelected = selectedEventId === event.id;
         return (
@@ -224,21 +247,21 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
               zIndex: isSelected ? 2 : 1, // 선택된 셀을 위로
             }}
           >
-            <div className="flex-grow">
-              <p>id : {event.id}</p>
+            <div className="flex-grow text-white">
+              {/* <p>id : {event.id}</p> */}
               <p className="font-bold text-[10px]">{event.eventName}</p>
               <p className="text-[8px]">{event.eventDetail}</p>
             </div>
-            <div className="text-right text-xs mt-auto">
-              {formatTime(event.startTime)}
-              {event.startTime?.hour} : {event.startTime?.minute}
+            <div className="flex flex-col text-right text-[8px] mt-auto text-white">
+              <p>{formatToHourMinute(event.startTime as string)}</p>
+              <p>{formatToHourMinute(event.endTime as string)}</p>
             </div>
           </div>
         );
       })}
 
-{/* 체크한 셀 표시 */}
-         {selectedCell.map((cell) => {
+      {/* 체크한 셀 표시 */}
+      {selectedCell.map((cell) => {
         if (!cell.day || !(cell.day in DAY_TO_COL)) {
           return null;
         }

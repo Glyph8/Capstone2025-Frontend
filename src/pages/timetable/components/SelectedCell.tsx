@@ -40,9 +40,9 @@ const SelectedCell = ({
   };
 
   return (
-    <div className="flex flex-row justify-between">
+    <div className="flex flex-row justify-between px-3">
       <div
-        className="relative top-7 left-6 box-content justify-center
+        className="relative box-content justify-center
                 w-56 text-black text-sm font-semibold font-['Roboto'] leading-none tracking-wide"
       >
         {selectedCell.map((sCell) => {
@@ -52,7 +52,7 @@ const SelectedCell = ({
       </div>
 
       <div
-        className="flex justify-center items-center relative top-7 right-7
+        className="flex justify-center items-center 
                 w-20 h-7 bg-[#08AC64] rounded-2xl
                  text-white text-xs font-normal font-[Pretendard]"
         onClick={clearCells}

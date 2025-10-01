@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* [data-vaul-overlay] {
+  background-color: transparent !important;
+  pointer-events: none;
+} */
+
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
@@ -19,6 +24,11 @@ body {
   min-width: 360px;
   font-family: "Pretendard";
   color: #000b25;
+}
+
+body [data-vaul-overlay] {
+  background-color: transparent !important;
+  pointer-events: none;
 }
 
 :root {

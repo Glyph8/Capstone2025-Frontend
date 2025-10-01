@@ -3,14 +3,14 @@
 // 좀덜흰색 = #FCFFFF
 
 import { useSelectCellStore, usePresetStore } from "../../../store/store";
-// import { sendEventRequest } from "../../apis/timetable";
 import SelectedCell from "./SelectedCell";
 import CellPreset from "./CellPreset";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sendEventRequest } from "../../../apis/timetable";
 import type { AddTimeRequest, Preset } from "@/types/timetable-types";
 import type { MakeMemberTimetableRequest } from "@/generated-api/Api";
 import { getRandomDarkHexColor } from "@/utils/randomColorUtils";
+import { formatLocalTime } from "@/utils/timetableUtils";
 
 const EditTableFrame = () => {
   const { selectedCell, clearCells } = useSelectCellStore();
@@ -29,8 +29,8 @@ const EditTableFrame = () => {
       const eventItem = {
         // id: cell.day + '_' + cell.startTime,
         day: cell.day,
-        startTime: cell.startTime,
-        endTime: cell.endTime,
+        startTime: formatLocalTime(cell.startTime),
+        endTime: formatLocalTime(cell.endTime),
         eventName: eventName,
         eventDetail: eventDetail,
         color: color,
@@ -38,12 +38,20 @@ const EditTableFrame = () => {
       return eventItem as MakeMemberTimetableRequest;
     });
     sendEventRequest(sendEvent);
+    clearCells();
+    setEventName("");
+    setEventDetail("");
   };
+
+  useEffect(()=>{
+
+    return () => clearCells();
+  }, [])
 
   return (
     <div
       className="flex flex-col justify-between
-        w-full h-96 pl-4 pr-4 bottom-0 absolute 
+        w-full max-w-200 h-56 px-4 pt-5 bottom-0  left-1/2 -translate-x-1/2 fixed
         bg-white rounded-tl-2xl rounded-tr-2xl 
         shadow-[0px_-0.05000000074505806px_1px_0px_rgba(0,0,0,0.25)] 
         overflow-hidden z-10"
@@ -85,7 +93,7 @@ const EditTableFrame = () => {
         </div>
 
         <div
-          className="flex flex-col justify-center w-6 h-6"
+          className="flex flex-col justify-center itmes-center w-7 h-6 relative top-3"
           onClick={() => {
             // 연속하게 select된 셀들 단위로 반복 요청.
             // selectedCell, eventName, eventDetail, color
@@ -95,7 +103,7 @@ const EditTableFrame = () => {
               selectedCell: selectedCell,
               eventName: eventName,
               eventDetail: eventDetail,
-              color: "#005B3F",
+              color: randomColor,
             };
             addEvent(request);
           }}

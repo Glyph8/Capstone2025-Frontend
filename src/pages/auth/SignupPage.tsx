@@ -57,19 +57,19 @@ const SignupPage = () => {
                 </div>
             </div>
 
-            {/* {!isSendMail ? ( */}
+            {!isSendMail ? (
                 <div className="mt-6">
                     <WideAcceptButton text="인증 메일 요청" isClickable={true} handleClick={() => {
                         requestMail(email)
                     }} />
                 </div>
-            {/* ) : ( */}
+            ) : ( 
                 <div className="w-full flex flex-col justify-center items-center mt-6">
                     <TextInputForm label="인증번호" placeholder="" isError={false} isPW={false} data={verifyCode} handleChange={setVerifyCode} />
                     {isVerifyed ? (
                         <SetPassword />
                     ) :
-                        <>
+                        <div className="mt-6">
                             <WideAcceptButton text="인증하기" isClickable={true} handleClick={() => {
                                 verifyByCode(email, verifyCode);
                             }} />
@@ -86,10 +86,10 @@ const SignupPage = () => {
                                     다시 보내기
                                 </span>
                             </div>
-                        </>}
+                        </div>}
                 </div>
-            {/* ) */}
-            {/* } */}
+            ) 
+             } 
         </div>
     )
 }
