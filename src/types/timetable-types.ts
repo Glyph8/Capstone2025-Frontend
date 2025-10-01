@@ -1,3 +1,5 @@
+import type { LookupTimetableResponse, MakeMemberTimetableRequest } from "@/generated-api/Api";
+
 export type dayString = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 
 // 시간표 추가 UI on / off 상태
@@ -15,13 +17,15 @@ export interface SelectedTime {
 }
 
 // 시간표에서 클릭한 셀들 정보를 모으는 상태
-export interface SelectedCellState {
-    selectedCell: SelectedTime[];
-    setSelectedCell: (newCell: SelectedTime[]) => void;
-}
+// export interface SelectedCellState {
+// interface SelectedCellState {
+//     // selectedCell: SelectedTime[];
+//     selectedCell: MakeMemberTimetableRequest[];
+//     setSelectedCell: (newCell: MakeMemberTimetableRequest[]) => void;
+// }
 
 export interface AddTimeRequest {
-    selectedCell: SelectedTime[];
+    selectedCell: MakeMemberTimetableRequest[];
     eventName: string;
     eventDetail: string;
     color: string;
@@ -29,9 +33,9 @@ export interface AddTimeRequest {
 
 // 서버에서 가져온 시간표 정보를 저장하는 상태
 export interface LoadTableState {
-    loadTable: Event[];
-    setLoadTable: (newTable: Event[]) => void;
-    addNewLoadTable: (newTable: Event) => void;
+    loadTable: LookupTimetableResponse[];
+    setLoadTable: (newTable: LookupTimetableResponse[]) => void;
+    addNewLoadTable: (newTable: LookupTimetableResponse) => void;
 }
 
 export interface Preset {

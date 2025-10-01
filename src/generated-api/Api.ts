@@ -10,6 +10,29 @@
  * ---------------------------------------------------------------
  */
 
+export interface CreateReviewRequest {
+  /**
+   * 관련된 비교과 id
+   * @format int64
+   * @example 1
+   */
+  extracurricularId?: number;
+  /**
+   * 리뷰내용
+   * @example "도움이 많이 됩니다."
+   */
+  content?: string;
+  /**
+   * 별점
+   * @example "ONE, TWO, THREE, FOUR, FIVE"
+   */
+  star: "ONE" | "TWO" | "THREE" | "FOUR" | "FIVE";
+}
+
+export interface ApiResponseBoolean {
+  result?: boolean;
+}
+
 /**
  * 끝 시간
  * @example "11:00:00.000000"
@@ -50,10 +73,6 @@ export interface MakeMemberTimetableRequest {
    * @example "#f6f6f6"
    */
   color?: string;
-}
-
-export interface ApiResponseBoolean {
-  result?: boolean;
 }
 
 export interface CreateScheduleRequest {
@@ -159,18 +178,12 @@ export interface ApiResponseQuestionToChatServerResponse {
   result?: QuestionToChatServerResponse;
 }
 
-/** 추천할 비교과 리스트 */
+/** 챗봇이 추천한 비교과 프로그램 목록 */
 export interface Program {
+  /** @format int64 */
+  id?: number;
   title?: string;
   url?: string;
-  applicationPeriod?: string;
-  targetAudience?: string;
-  selectionMethod?: string;
-  duration?: string;
-  purposeOfTheActivity?: string;
-  participationBenefitsAndExpectedOutcomes?: string;
-  process?: string;
-  modeOfOperation?: string;
 }
 
 export interface QuestionToChatServerResponse {
@@ -179,8 +192,8 @@ export interface QuestionToChatServerResponse {
    * @example "OO님의 관심사는 ~~이며, 다음의 비교과를 추천합니다."
    */
   answer?: string;
-  /** 추천할 비교과 리스트 */
-  recommendedProgramList?: Program[];
+  /** 챗봇이 추천한 비교과 프로그램 목록 */
+  sources?: Program[];
 }
 
 export interface ChangeTimetableRequest {
@@ -248,6 +261,53 @@ export interface ChangeScheduleRequest {
    * @format int64
    */
   extracurricularId?: number;
+}
+
+export interface ApiResponsePageResponseReviewResponse {
+  result?: PageResponseReviewResponse;
+}
+
+export interface PageResponseReviewResponse {
+  /** 페이지 응답 */
+  data?: ReviewResponse[];
+  /**
+   * 전체 페이지 수
+   * @format int32
+   */
+  totalPages?: number;
+  /** 마지막 페이지 여부 */
+  isLastPage?: boolean;
+}
+
+/** 페이지 응답 */
+export interface ReviewResponse {
+  /**
+   * 리뷰ID
+   * @format int64
+   * @example 1
+   */
+  reviewId?: number;
+  /**
+   * 관련된 비교과 ID
+   * @format int64
+   * @example 1
+   */
+  extracurricularId?: number;
+  /**
+   * 관련된 비교과 제목
+   * @example "A비교과"
+   */
+  title?: string;
+  /**
+   * 리뷰내용
+   * @example "좋아요!"
+   */
+  content?: string;
+  /**
+   * 별점
+   * @example "FIVE"
+   */
+  star?: "ONE" | "TWO" | "THREE" | "FOUR" | "FIVE";
 }
 
 export interface ApiResponseListLookupTimetableResponse {
@@ -500,6 +560,15 @@ export interface LookupMemberInfoResponse {
   grade?: number;
 }
 
+export interface DeleteTimetableRequest {
+  /**
+   * 삭제할 시간표 Id
+   * @format int64
+   * @example 1
+   */
+  deleteTimetableId: number;
+}
+
 export interface DeleteScheduleRequest {
   /**
    * 삭제할 스케쥴 Id
@@ -507,6 +576,15 @@ export interface DeleteScheduleRequest {
    * @example 1
    */
   deleteScheduleId: number;
+}
+
+export interface DeleteMyReviewRequest {
+  /**
+   * 삭제할 리뷰 Id
+   * @format int64
+   * @example 1
+   */
+  deleteReviewId?: number;
 }
 
 import type {
@@ -711,6 +789,57 @@ export class Api<
 
   v1 = {
     /**
+     * @description viewReview
+     *
+     * @tags 리뷰
+     * @name ViewReview
+     * @summary 리뷰조회
+     * @request GET:/v1/review
+     * @secure
+     */
+    viewReview: (
+      query?: {
+        /**
+         * @format int32
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 10
+         */
+        size?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponsePageResponseReviewResponse, any>({
+        path: `/v1/review`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description createReview
+     *
+     * @tags 리뷰
+     * @name CreateReview
+     * @summary 리뷰쓰기
+     * @request POST:/v1/review
+     * @secure
+     */
+    createReview: (data: CreateReviewRequest, params: RequestParams = {}) =>
+      this.request<ApiResponseBoolean, any>({
+        path: `/v1/review`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
      * @description lookUptimeTable
      *
      * @tags 멤버 정보 조회
@@ -743,6 +872,28 @@ export class Api<
       this.request<ApiResponseBoolean, any>({
         path: `/v1/member/timetable`,
         method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description deleteTimetable
+     *
+     * @tags 내 정보 설정 컨트롤러
+     * @name DeleteTimetable
+     * @summary 시간표 삭제
+     * @request DELETE:/v1/member/timetable
+     * @secure
+     */
+    deleteTimetable: (
+      data: DeleteTimetableRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponseBoolean, any>({
+        path: `/v1/member/timetable`,
+        method: "DELETE",
         body: data,
         secure: true,
         type: ContentType.Json,
@@ -1002,6 +1153,72 @@ export class Api<
       }),
 
     /**
+     * @description searchReview
+     *
+     * @tags 리뷰
+     * @name SearchReview
+     * @summary 리뷰검색
+     * @request GET:/v1/search-review
+     * @secure
+     */
+    searchReview: (
+      query: {
+        key: string;
+        /**
+         * @format int32
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 10
+         */
+        size?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponsePageResponseReviewResponse, any>({
+        path: `/v1/search-review`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description searchMyReview
+     *
+     * @tags 리뷰
+     * @name SearchMyReview
+     * @summary 내 리뷰 검색
+     * @request GET:/v1/member/search-review
+     * @secure
+     */
+    searchMyReview: (
+      query: {
+        key: string;
+        /**
+         * @format int32
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 10
+         */
+        size?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponsePageResponseReviewResponse, any>({
+        path: `/v1/member/search-review`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
      * @description searchMyExtracurricular
      *
      * @tags 내가 추가한 비교과 활동 관련 컨트롤러
@@ -1069,6 +1286,57 @@ export class Api<
         path: `/v1/member/schedule/${scheduleId}`,
         method: "GET",
         secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description viewMyReview
+     *
+     * @tags 리뷰
+     * @name ViewMyReview
+     * @summary 내 리뷰 조회
+     * @request GET:/v1/member/review
+     * @secure
+     */
+    viewMyReview: (
+      query?: {
+        /**
+         * @format int32
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @format int32
+         * @default 10
+         */
+        size?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponsePageResponseReviewResponse, any>({
+        path: `/v1/member/review`,
+        method: "GET",
+        query: query,
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * @description deleteMyReview
+     *
+     * @tags 리뷰
+     * @name DeleteMyReview
+     * @summary 내 리뷰 삭제
+     * @request DELETE:/v1/member/review
+     * @secure
+     */
+    deleteMyReview: (data: DeleteMyReviewRequest, params: RequestParams = {}) =>
+      this.request<ApiResponseBoolean, any>({
+        path: `/v1/member/review`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         ...params,
       }),
 

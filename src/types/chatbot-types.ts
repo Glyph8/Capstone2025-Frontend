@@ -1,3 +1,5 @@
+import type { Program } from "@/generated-api/Api";
+
 // 챗봇 페이지 on/off 상태
 export interface ChatBotPageState {
     isChatBotOpen: boolean;
@@ -6,17 +8,6 @@ export interface ChatBotPageState {
 
 export type ContextType =
     | { type: 'user'; message: string }
-    | { type: 'bot'; answer: string; recommendedProgramList?: RecommendedProgram[] };
+    | { type: 'bot'; answer: string; recommendedProgramList?: Program[] }
+    | {type: 'loading';}
 
-export interface RecommendedProgram {
-    title: string;
-    url: string;
-    applicationPeriod: string;
-    targetAudience: string;
-    selectionMethod: string;
-    duration: string;
-    purposeOfTheActivity: string;
-    participationBenefitsAndExpectedOutcomes: string;
-    process: string;
-    modeOfOperation: string;
-}

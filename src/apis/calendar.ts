@@ -1,8 +1,9 @@
-import type { CreateScheduleRequest } from "@/api/Api";
 import api from "@/apis/index"
+import type { ChangeScheduleRequest, CreateScheduleRequest } from "@/generated-api/Api";
 
 export const getCalendarApi = async (year:number, month:number) => {
     try {
+        console.log(year, "년, " ,month , "월 캘린더 요청");
         const response = api.getScheduleByYearAndMonth(year, month);
         return (await response).data.result;
     }
@@ -33,6 +34,17 @@ export const createScheduleApi = async (newEvent: CreateScheduleRequest) => {
     catch(error){
         console.error("스케쥴 생성 api 요청 실패 : error ", error);
         throw new Error("스케쥴 생성 진행 중 오류 발생"); 
+    }
+} 
+
+export const patchScheduleApi = async (newEvent: ChangeScheduleRequest) => {
+    try {
+        const response = await api.changeSchedule(newEvent)
+        return response.data.result;
+    }
+    catch(error){
+        console.error("스케쥴 편집 api 요청 실패 : error ", error);
+        throw new Error("스케쥴 편집 진행 중 오류 발생"); 
     }
 } 
 

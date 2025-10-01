@@ -1,6 +1,6 @@
 import UpperNav from "../../components/UpperNav.tsx";
-import TimeTableLabel from "./TimeTableLabel.tsx";
-import TimeTableGrid from "./TimeTableGrid.tsx";
+import TimeTableLabel from "./components/TimeTableLabel.tsx";
+import TimeTableGrid from "./components/TimeTableGrid.tsx";
 import { useAddTimeTableStore } from "../../store/store.ts";
 
 const TimeTablePage = () => {

@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage.tsx";
 import SignupPage from "../pages/auth/SignupPage.tsx";
 import NotFound from "../pages/NotFound.tsx";

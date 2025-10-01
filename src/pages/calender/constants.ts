@@ -1,5 +1,5 @@
+import type { GetScheduleByYearAndMonthResponse, GetScheduleDetailResponse } from "@/generated-api/Api"
 
-import type { GetScheduleByYearAndMonthResponse, GetScheduleDetailResponse } from "@/api/Api";
 
 /** /v1/member/schedule/{year}/{month} 응답 -> result만 빼옴*/
 export const dummyCalender: GetScheduleByYearAndMonthResponse[] =

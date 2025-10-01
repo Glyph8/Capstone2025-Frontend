@@ -27,13 +27,14 @@ const SignupPage = () => {
         const codeResult = verifyAuthCode(email, code);
         console.log("api response", await codeResult)
         if (!await codeResult) {
-            alert("인증번호가 일치하지 않습니다.\n테스트를 위해 강제 진행합니다.")
-            console.error();
-            setIsVerifyed(true)
+            // alert("인증번호가 일치하지 않습니다.\n테스트를 위해 강제 진행합니다.")
+            alert(`인증번호가 사용에 문제!  email : ${email} code : ${code}`)
+            console.error("인증 번호 불일치");
+            // setIsVerifyed(true)
 
         }
         else if (await codeResult) {
-            localStorage.setItem("access-token", await codeResult)
+            localStorage.setItem("access_token", await codeResult)
             setIsVerifyed(true)
         }
 
@@ -52,7 +53,7 @@ const SignupPage = () => {
                 </nav>
 
                 <div className="w-full flex flex-col justify-center items-center mt-12">
-                    <TextInputForm label="이메일" placeholder="konkuk@konkuk.ac.kr" isError={false} isPW={false} handleChange={setEmail} />
+                    <TextInputForm label="이메일" placeholder="konkuk@konkuk.ac.kr" isError={false} isPW={false} data={email} handleChange={setEmail} />
                 </div>
             </div>
 
@@ -62,16 +63,13 @@ const SignupPage = () => {
                         requestMail(email)
                     }} />
                 </div>
-            ) : (
-
+            ) : ( 
                 <div className="w-full flex flex-col justify-center items-center mt-6">
-                    <TextInputForm label="인증번호" placeholder="" isError={false} isPW={false} handleChange={setVerifyCode} />
-
+                    <TextInputForm label="인증번호" placeholder="" isError={false} isPW={false} data={verifyCode} handleChange={setVerifyCode} />
                     {isVerifyed ? (
                         <SetPassword />
                     ) :
-
-                        <>
+                        <div className="mt-6">
                             <WideAcceptButton text="인증하기" isClickable={true} handleClick={() => {
                                 verifyByCode(email, verifyCode);
                             }} />
@@ -88,16 +86,10 @@ const SignupPage = () => {
                                     다시 보내기
                                 </span>
                             </div>
-                        </>}
+                        </div>}
                 </div>
-
-            )
-
-            }
-
-            {/* {isVerifyed ? (
-                <SetPassword />
-            ) : null} */}
+            ) 
+             } 
         </div>
     )
 }
