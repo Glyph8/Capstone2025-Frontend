@@ -26,7 +26,8 @@ export function AlarmIconButton({
   /**
    * 아이콘을 클릭할 때 실행되는 핸들러
    */
-  const handleClick = async () => {
+  const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     // 3. 이미 로딩 중이면 중복 클릭 방지
     if (isLoading) return;
 
