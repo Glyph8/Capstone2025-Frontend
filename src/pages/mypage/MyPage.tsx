@@ -4,7 +4,11 @@ import WideAcceptButton from "../../components/WideAcceptButton";
 import { useEffect, useState } from "react";
 import { getMyInfo } from "@/apis/mypage";
 import type { LookupMemberInfoResponse } from "@/generated-api/Api";
-import type { AcademicStatus, KoreanAcademicStatus } from "@/types/mypage-types";
+import type {
+  AcademicStatus,
+  KoreanAcademicStatus,
+} from "@/types/mypage-types";
+import ScheduleNotificationSwitch from "./ScheduleNotificationSwitch";
 
 const ACADEMIC_STATUS_MAP: Record<AcademicStatus, KoreanAcademicStatus> = {
   ENROLLED: "재학",
@@ -84,26 +88,30 @@ const MyPage = () => {
                 학년 : {profile.grade}
               </div>
               <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                현재 학적 : {ACADEMIC_STATUS_MAP[profile.academicStatus ?? "ENROLLED"]}
+                현재 학적 :{" "}
+                {ACADEMIC_STATUS_MAP[profile.academicStatus ?? "ENROLLED"]}
               </div>
             </div>
 
             <div className="h-14 flex justify-between items-center text-black text-base font-light leading-none tracking-wide">
-              학적정보 수정
+              <h2>학적정보 수정</h2>
               <button onClick={handleAcademicInfo}>
                 <img src="/icons/arrow-right.svg" alt="다음버튼" />
               </button>
             </div>
 
             <div className="h-14 flex justify-between items-center text-black text-base font-light font-['Pretendard'] leading-none tracking-wide">
-              관심 카테고리 수정
+              <h2>관심 카테고리 수정</h2>
               <button onClick={handleInterest}>
                 <img src="/icons/arrow-right.svg" alt="다음 버튼" />
               </button>
             </div>
           </div>
         </nav>
-
+        <nav className="flex justify-between">
+          <h2>알림 설정</h2>
+          <ScheduleNotificationSwitch />
+        </nav>
         <div className="w-full flex flex-col justify-center items-center mt-16">
           <WideAcceptButton
             text="히스토리 조회 및 리뷰작성"
