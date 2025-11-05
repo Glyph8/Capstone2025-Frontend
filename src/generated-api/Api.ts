@@ -104,6 +104,20 @@ export interface CreateScheduleRequest {
   extracurricularId?: number;
 }
 
+export interface ScheduleAlarmRequest {
+  /**
+   * 스케쥴 id
+   * @format int64
+   * @example 1
+   */
+  scheduleId?: number;
+  /**
+   * 알림 설정 여부
+   * @example true
+   */
+  isAlarm?: boolean;
+}
+
 export interface SetPasswordRequest {
   /**
    * 패스워드 설정
@@ -118,6 +132,14 @@ export interface InterestRequest {
    * @example "웹 개발, AI, 백엔드"
    */
   interestContent: string;
+}
+
+export interface FcmTokenRequest {
+  /**
+   * fcm token
+   * @example "abc"
+   */
+  fcmToken?: string;
 }
 
 export interface SendAuthMailRequest {
@@ -980,6 +1002,28 @@ export class Api<
       }),
 
     /**
+     * @description scheduleAlarm
+     *
+     * @tags 스케쥴(캘린더)
+     * @name SetAlarmSchedule
+     * @summary 스케쥴 알림 설정
+     * @request POST:/v1/member/schedule/alarm
+     * @secure
+     */
+    setAlarmSchedule: (
+      data: ScheduleAlarmRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ApiResponseBoolean, any>({
+        path: `/v1/member/schedule/alarm`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
      * @description setPassword
      *
      * @tags 온보딩
@@ -1047,6 +1091,25 @@ export class Api<
       this.request<ApiResponseBoolean, any>({
         path: `/v1/member/interest`,
         method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description updateFcmToken
+     *
+     * @tags 내 정보 설정 컨트롤러
+     * @name UpdateFcmToken
+     * @summary fcm 토큰 발급
+     * @request POST:/v1/member/fcm-token
+     * @secure
+     */
+    updateFcmToken: (data: FcmTokenRequest, params: RequestParams = {}) =>
+      this.request<ApiResponseBoolean, any>({
+        path: `/v1/member/fcm-token`,
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,

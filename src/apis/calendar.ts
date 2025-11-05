@@ -1,6 +1,32 @@
 import api from "@/apis/index"
 import type { ChangeScheduleRequest, CreateScheduleRequest } from "@/generated-api/Api";
 
+
+export const setAlramSchedule = async (scheduleId:number, isAlarm: boolean) =>{
+    try {
+        const response = api.setAlarmSchedule({
+            scheduleId:scheduleId,
+            isAlarm:isAlarm
+    })
+        return (await response).data.result;
+    }
+    catch(error){
+        console.error("스케쥴 별 알림설정 api 요청 실패 : error ", error);
+        throw new Error("스케쥴 별 알림설정 진행 중 오류 발생"); 
+    }
+}
+
+export const sendFCMToken = async (token:string) =>{
+    try {
+        const response = api.updateFcmToken({fcmToken:token})
+        return (await response).data.result;
+    }
+    catch(error){
+        console.error("fcmp 토큰 api 요청 실패 : error ", error);
+        throw new Error("fcmp 토큰 진행 중 오류 발생"); 
+    }
+}
+
 export const getCalendarApi = async (year:number, month:number) => {
     try {
         console.log(year, "년, " ,month , "월 캘린더 요청");

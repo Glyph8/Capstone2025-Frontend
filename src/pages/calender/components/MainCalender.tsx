@@ -8,6 +8,8 @@ import { useState } from "react";
 import { ko } from "date-fns/locale";
 import { format } from "date-fns";
 import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
+import { getDateOnly } from "@/utils/date";
+import { ScheduleItem } from "./ScheduleItem";
 
 interface MainCalendarProps {
   data?: GetScheduleByYearAndMonthResponse[];
@@ -23,87 +25,38 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(-1);
 
-  const formatKoreanDateTimeNative = (isoString: string): string => {
-    const date = new Date(isoString);
-    const year = date.getFullYear();
-    // getMonth()는 0부터 시작하므로 (0=1월, 1=2월, ...) +1을 해줘야 합니다. (매우 중요!)
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    return `${year}년 ${month}월 ${day}일 ${hours}시:${minutes}분`;
-  };
-
-  const showEvent = (event: GetScheduleByYearAndMonthResponse) => {
-    if (event) {
-      let type = "--";
-      let typeBarColor = "#fff";
-      let typeBlockColor = "#fff";
-      if (event.scheduleType === "EXTRACURRICULAR") {
-        type = "비교과";
-        typeBarColor = "after:bg-red-500";
-        typeBlockColor = "bg-red-500";
-      } else {
-        type = "일반";
-        typeBarColor = "after:bg-blue-500";
-        typeBlockColor = "bg-blue-500";
-      }
-
-      return (
-        <div
-          key={`event-${event.scheduleId ?? Math.random()}`}
-          className={`bg-muted ${typeBarColor} mb-2 relative rounded-md p-2 pl-6 text-sm after:absolute after:inset-y-2 after:left-2 after:w-1 after:rounded-full`}
-          onClick={() => handleScheduleClick(event.scheduleId ?? -1)}
-        >
-          <div className="flex justify-between font-medium">
-            {event.title}
-            <span
-              className={`w-14 text-center rounded-[5px] ${typeBlockColor} text-white`}
-            >
-              {type}
-            </span>
-          </div>
-          <div className="text-muted-foreground text-xs">
-            {formatKoreanDateTimeNative(event.startDateTime ?? "")} 부터 ~{formatKoreanDateTimeNative(event.endDateTime ?? "")} 까지
-          </div>
-        </div>
-      );
-    } else {
-      return <span>일정 데이터 로드 오류</span>;
-    }
-  };
-  const stringToDate = (stringDate: string) => {
-    return new Date(stringDate);
-  };
-
+  // 선택된 날짜에 해당하는 일정인지 확인
   const isInRange = (event: GetScheduleByYearAndMonthResponse) => {
-    // const isInRange = (event: unknown) => {
-    // event의 start, endDateTime이 undifined라면 오늘 날짜정보로 대체
-    return (
-      date &&
-      event.startDateTime &&
-      stringToDate(event.startDateTime) <= date &&
-      event.endDateTime &&
-      stringToDate(event.endDateTime) >= date
-    );
+    if (!date || !event.startDateTime || !event.endDateTime) {
+      return false;
+    }
+    const selectedDate = getDateOnly(date);
+    const startDate = getDateOnly(new Date(event.startDateTime));
+    const endDate = getDateOnly(new Date(event.endDateTime));
+
+    // 선택된 날짜가 시작일과 종료일 사이에 있는지 확인 (양 끝 포함)
+    return selectedDate >= startDate && selectedDate <= endDate;
   };
 
+  // 특정 날짜에 일정이 있는지 확인하고 표시
   const isInData = (year: number, month: number, day: number) => {
-    const comp = new Date(year, month, day);
+    const compareDate = getDateOnly(new Date(year, month, day));
+    
     const filtered = (data ?? []).filter((d) => {
       if (d.startDateTime && d.endDateTime) {
-        return (
-          date &&
-          stringToDate(d.startDateTime) <= comp &&
-          stringToDate(d.endDateTime) >= comp
-        );
+        const startDate = getDateOnly(new Date(d.startDateTime));
+        const endDate = getDateOnly(new Date(d.endDateTime));
+        
+        // compareDate가 시작일과 종료일 사이에 있는지 확인 (양 끝 포함)
+        return compareDate >= startDate && compareDate <= endDate;
       }
+      return false;
     });
-    // console.log(filtered);
+
     if (filtered.length > 0) {
       let isExt = false;
       let isNorm = false;
+      
       filtered.forEach((f) => {
         if (f.scheduleType === "EXTRACURRICULAR") {
           isExt = true;
@@ -112,6 +65,8 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
           isNorm = true;
         }
       });
+
+      // 비교과와 일반이 모두 있는 경우
       if (isExt && isNorm) {
         return (
           <div className="flex gap-0.5">
@@ -123,10 +78,10 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
         return <div className="w-1 h-1 rounded-full bg-blue-500" />;
       } else if (isExt) {
         return <div className="w-1 h-1 rounded-full bg-red-500" />;
-      } else return null;
-    } else {
-      return null;
+      }
     }
+    
+    return null;
   };
 
   const handleScheduleClick = (id: number) => {
@@ -150,8 +105,8 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
           selected={date}
           onSelect={setDate}
           onMonthChange={(monthDateObject) => {
-            const newYear = monthDateObject.getFullYear(); // 예: 2025
-            const newMonth = monthDateObject.getMonth() + 1; // 예: 9 (0-11이므로 +1)
+            const newYear = monthDateObject.getFullYear();
+            const newMonth = monthDateObject.getMonth() + 1;
             setRequestYM({ year: newYear, month: newMonth });
           }}
           className="bg-transparent p-0"
@@ -191,17 +146,21 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
             size="icon"
             className="size-6"
             title="Add Event"
-            // 0번 스케쥴 아이디를, 생성용으로 지정
             onClick={() => handleScheduleClick(0)}
           >
             <PlusIcon />
             <span className="sr-only">Add Event</span>
           </Button>
         </div>
-        <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col">
           {(data ?? []).map((event) => (
             <div className="h-fit" key={event.scheduleId}>
-              {isInRange(event) ? showEvent(event) : null}
+              {isInRange(event) ? (
+                <ScheduleItem 
+                  event={event} 
+                  onClick={handleScheduleClick} 
+                />
+              ) : null}
             </div>
           ))}
         </div>
