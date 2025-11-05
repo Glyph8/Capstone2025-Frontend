@@ -1,6 +1,7 @@
 import { sendFCMToken } from "@/apis/calendar";
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
+  deleteToken,
   getMessaging,
   getToken,
   onMessage,
@@ -9,15 +10,20 @@ import {
 
 // 1. Firebase 설정 (서비스 워커와 동일한 값)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-};
+  apiKey: "AIzaSyB7f2IzatJXsuxMZk6BcPsAS5ojuRdN8ds",
 
+  authDomain: "capstone-5f88f.firebaseapp.com",
+
+  projectId: "capstone-5f88f",
+
+  storageBucket: "capstone-5f88f.firebasestorage.app",
+
+  messagingSenderId: "1094578308157",
+
+  appId: "1:1094578308157:web:960650dda30eb3cb021654",
+
+  measurementId: "G-K8GVY0TB1H",
+};
 // 2. Firebase 앱 초기화 (싱글톤 패턴 권장)
 let app: FirebaseApp;
 let messaging: Messaging;
@@ -61,6 +67,7 @@ export const requestNotificationPermission = async (): Promise<
       if (fcmToken) {
         // 3. FCM 토큰을 백엔드에 저장
         await sendFCMToken(fcmToken);
+        console.log("FCM TOKEN :", fcmToken);
         return fcmToken;
       } else {
         console.warn(
@@ -75,6 +82,23 @@ export const requestNotificationPermission = async (): Promise<
   } catch (error) {
     console.error("알림 권한 요청 또는 토큰 발급 중 오류:", error);
     return null;
+  }
+};
+
+export const deleteTokenFromBrowser = async (): Promise<boolean> => {
+  if (!messaging) {
+    console.error("Firebase Messaging이 초기화되지 않았습니다.");
+    return false;
+  }
+
+  try {
+    // 3. deleteToken 함수 실행
+    await deleteToken(messaging);
+    console.log("브라우저에서 FCM 토큰이 성공적으로 삭제되었습니다.");
+    return true;
+  } catch (error) {
+    console.error("브라우저 토큰 삭제 중 오류 발생:", error);
+    return false;
   }
 };
 
