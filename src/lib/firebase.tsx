@@ -1,5 +1,6 @@
 import { sendFCMToken } from "@/apis/calendar";
 import { initializeApp, type FirebaseApp } from "firebase/app";
+import { toast } from "react-hot-toast";
 import {
   deleteToken,
   getMessaging,
@@ -10,20 +11,15 @@ import {
 
 // 1. Firebase 설정 (서비스 워커와 동일한 값)
 const firebaseConfig = {
-  apiKey: "AIzaSyB7f2IzatJXsuxMZk6BcPsAS5ojuRdN8ds",
-
-  authDomain: "capstone-5f88f.firebaseapp.com",
-
-  projectId: "capstone-5f88f",
-
-  storageBucket: "capstone-5f88f.firebasestorage.app",
-
-  messagingSenderId: "1094578308157",
-
-  appId: "1:1094578308157:web:960650dda30eb3cb021654",
-
-  measurementId: "G-K8GVY0TB1H",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
 // 2. Firebase 앱 초기화 (싱글톤 패턴 권장)
 let app: FirebaseApp;
 let messaging: Messaging;
@@ -109,12 +105,17 @@ export const deleteTokenFromBrowser = async (): Promise<boolean> => {
 export const initializeForegroundMessageListener = () => {
   if (messaging) {
     onMessage(messaging, (payload) => {
-      console.log("포그라운드 메시지 수신:", payload);
-      // 이 경우 브라우저 알림이 자동으로 뜨지 않습니다.
-      // React 컴포넌트 내에서 직접 커스텀 알림(e.g., in-app-popup)을 띄워야 합니다.
-      alert(
-        `[포그라운드 알림] ${payload.notification?.title}: ${payload.notification?.body}`
-      );
+      if (payload.notification) {
+        toast.success(
+          <div>
+            <b>{payload.notification.title || "새 알림"}</b>
+            <p>{payload.notification.body || ""}</p>
+          </div>,
+          {
+            duration: 2000, // 5초 동안 보이기
+          }
+        );
+      }
     });
   }
 };
