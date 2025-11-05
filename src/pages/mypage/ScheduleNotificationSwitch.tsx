@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
-import { requestNotificationPermission } from "@/lib/firebase";
+import { deleteTokenFromBrowser, requestNotificationPermission } from "@/lib/firebase";
 
 /**
  * 스케쥴 알림 구독을 관리하는 토글 스위치 컴포넌트
@@ -23,9 +23,11 @@ function ScheduleNotificationSwitch() {
   // 3. 스위치를 토글할 때 실행되는 메인 핸들러
   const handleToggle = async (newEnabledState: boolean) => {
     setIsLoading(true);
+    console.log('--- A. handleToggle 함수 실행 시작! ---');
 
     if (newEnabledState) {
       // --- 스위치를 ON으로 켤 때 (알림 구독) ---
+      console.log('--- B. (ON) requestNotificationPermission 호출 시도 ---');
       try {
         // 4. Firebase 푸시 알림 권한을 요청하고 토큰을 백엔드에 저장합니다.
         const fcmToken = await requestNotificationPermission();
@@ -45,6 +47,21 @@ function ScheduleNotificationSwitch() {
       }
     } else {
       // --- 스위치를 OFF로 끌 때 (알림 구독 해지) ---
+      try {
+        // 백엔드 API 대신 브라우저 토큰을 삭제합니다.
+        const isDeleted = await deleteTokenFromBrowser()
+        if (isDeleted) {
+          setIsEnabled(false); // UI 끄기
+          console.log('알림 구독 해지 완료 (브라우저 토큰 삭제됨)');
+        } else {
+          // 토큰 삭제 실패 시, UI를 롤백 (끄지 못함)
+          setIsEnabled(true); 
+          alert('알림 해지에 실패했습니다. 다시 시도해주세요.');
+        }
+      } catch (error) {
+        console.error('알림 해지 중 오류:', error);
+        setIsEnabled(true); // 롤백
+      }
       // 5. TODO: 이 부분은 백엔드와 연동이 필요합니다.
       // (예: 백엔드에 '이 fcmToken을 삭제해줘'라고 요청하는 API)
       console.log("알림 구독 해지 로직 실행 (백엔드 API 연동 필요)");

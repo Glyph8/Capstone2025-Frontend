@@ -4,13 +4,13 @@ importScripts("https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-comp
 
 // 1. Firebase 프로젝트 설정 (Firebase 콘솔에서 가져오세요)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyB7f2IzatJXsuxMZk6BcPsAS5ojuRdN8ds",
+  authDomain: "capstone-5f88f.firebaseapp.com",
+  projectId: "capstone-5f88f",
+  storageBucket: "capstone-5f88f.firebasestorage.app",
+  messagingSenderId: "1094578308157",
+  appId: "1:1094578308157:web:960650dda30eb3cb021654",
+  measurementId: "G-K8GVY0TB1H",
 };
 firebase.initializeApp(firebaseConfig);
 
