@@ -25,12 +25,12 @@ messaging.onBackgroundMessage((payload) => {
   );
 
   // 브라우저 알림(토스트)을 직접 띄웁니다.
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification.title || "새 알림";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/icons/icon-192x192.png", // public 폴더 내의 아이콘 경로
+    body: payload.notification.body || "새로운 소식이 있습니다",
+    icon: "/vite.svg", // public 폴더 내의 아이콘 경로
   };
 
   // self.registration은 서비스 워커 자신을 가리킵니다.
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });

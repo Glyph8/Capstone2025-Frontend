@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
-import { deleteTokenFromBrowser, requestNotificationPermission } from "@/lib/firebase";
+// import { deleteTokenFromBrowser, requestNotificationPermission } from "@/lib/firebase_v1";
 
 /**
  * 스케쥴 알림 구독을 관리하는 토글 스위치 컴포넌트
@@ -30,7 +30,8 @@ function ScheduleNotificationSwitch() {
       console.log('--- B. (ON) requestNotificationPermission 호출 시도 ---');
       try {
         // 4. Firebase 푸시 알림 권한을 요청하고 토큰을 백엔드에 저장합니다.
-        const fcmToken = await requestNotificationPermission();
+        // const fcmToken = await requestNotificationPermission();
+        const fcmToken= "";
 
         if (fcmToken) {
           // 성공: 토큰 발급 및 백엔드 저장 완료
@@ -49,7 +50,8 @@ function ScheduleNotificationSwitch() {
       // --- 스위치를 OFF로 끌 때 (알림 구독 해지) ---
       try {
         // 백엔드 API 대신 브라우저 토큰을 삭제합니다.
-        const isDeleted = await deleteTokenFromBrowser()
+        // const isDeleted = await deleteTokenFromBrowser()
+        const isDeleted = null;
         if (isDeleted) {
           setIsEnabled(false); // UI 끄기
           console.log('알림 구독 해지 완료 (브라우저 토큰 삭제됨)');

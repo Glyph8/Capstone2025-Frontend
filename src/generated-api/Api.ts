@@ -456,6 +456,11 @@ export interface GetScheduleByYearAndMonthResponse {
    * @format date-time
    */
   endDateTime?: string;
+  /**
+   * 알림 설정 여부
+   * @example true
+   */
+  isAlarm?: boolean;
 }
 
 export interface ApiResponseGetScheduleDetailResponse {

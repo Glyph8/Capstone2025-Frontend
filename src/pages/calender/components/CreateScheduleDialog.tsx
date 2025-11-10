@@ -1,13 +1,18 @@
 import {
   createScheduleApi,
   getDetailScheduleApi,
+  getExtraCurriApi,
   patchScheduleApi,
 } from "@/apis/calendar";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import WideAcceptButton from "@/components/WideAcceptButton";
 import { useEffect, useState } from "react";
-import type { GetScheduleDetailResponse } from "@/generated-api/Api";
+import type {
+  ExtracurricularResponse,
+  GetScheduleDetailResponse,
+} from "@/generated-api/Api";
+import { formatKoreanDateTimeNative } from "@/utils/date";
 
 interface CreateScheduleDialogProps {
   isOpen: boolean;
@@ -27,7 +32,7 @@ export const CreateScheduleDialog = ({
   isOpen,
   setIsOpen,
   scheduleId,
-   onSuccess,
+  onSuccess,
 }: CreateScheduleDialogProps) => {
   const [data, setData] = useState<GetScheduleDetailResponse>(emptyData);
   const [title, setTitle] = useState<string>(data.title ?? "");
@@ -35,11 +40,18 @@ export const CreateScheduleDialog = ({
   const [content, setContent] = useState("");
   const [startDateTime, setStartDateTime] = useState(data.startDateTime);
   const [endDateTime, setEndDateTime] = useState(data.endDateTime);
+  const [extraCurriID, setExtraCurriID] = useState<string | null>(
+    data.extracurricularField?.originTitle ?? null
+  );
+  const [extraQuery, setExtraQuery] = useState("");
+  const [extraCurri, setExtraCurri] = useState<
+    ExtracurricularResponse[] | undefined
+  >([]);
 
   const handlePostSchedule = async () => {
     const newEvent = {
       title: title,
-      scheduleType: scheduleType,
+      scheduleType: extraCurriID,
       content: content,
       startDateTime: startDateTime,
       endDateTime: endDateTime,
@@ -51,7 +63,7 @@ export const CreateScheduleDialog = ({
       const res = await createScheduleApi(newEvent);
       if (res) {
         console.log("일정 추가 성공");
-         onSuccess();
+        onSuccess();
       } else {
         console.log("일정 추가 실패, 입력 : ", newEvent.title);
       }
@@ -63,7 +75,7 @@ export const CreateScheduleDialog = ({
       });
       if (res) {
         console.log("일정 수정 성공");
-         onSuccess();
+        onSuccess();
       } else {
         console.log("일정 수정 실패, 입력 : ", newEvent.title);
       }
@@ -99,7 +111,14 @@ export const CreateScheduleDialog = ({
       }
     };
     process();
-  }, [data.content, data.endDateTime, data.scheduleType, data.startDateTime, data.title, scheduleId]);
+  }, [
+    data.content,
+    data.endDateTime,
+    data.scheduleType,
+    data.startDateTime,
+    data.title,
+    scheduleId,
+  ]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -111,7 +130,7 @@ export const CreateScheduleDialog = ({
               제목
             </span>
             <input
-              className="text-black-1 text-base font-medium leading-loose"
+              className="flex-1 text-black-1 text-base font-medium leading-loose overflow-auto"
               value={title}
               placeholder="일정의 제목을 입력해주세요."
               onChange={(e) => setTitle(e.target.value)}
@@ -143,6 +162,57 @@ export const CreateScheduleDialog = ({
               <label htmlFor="비교과"> 비교과 </label>
             </span>
           </span>
+          {scheduleType === "EXTRACURRICULAR" && (
+            <>
+              <div className="flex gap-5">
+                <span>비교과 검색</span>
+                <input
+                  type="text"
+                  placeholder="비교과 이름 검색"
+                  value={extraQuery}
+                  onChange={(e) => setExtraQuery(e.target.value)}
+                />
+                <button
+                  className="bg-[#01A862] px-2 rounded-2xl text-white"
+                  onClick={async () => {
+                    const result = await getExtraCurriApi(extraQuery);
+                    setExtraCurri(result?.data);
+                  }}
+                >
+                  검색
+                </button>
+              </div>
+              <ul className="flex flex-col gap-3 max-h-60 overflow-auto">
+                {(extraCurri ?? []).map((item) => (
+                  <li
+                    style={{borderColor: `${item.id?.toString() === extraCurriID ?'#01A862' : 'white'}`}}
+                    className="bg-white flex flex-col gap-2 border-1 border-white rounded-2xl p-1"
+                    key={item.id}
+                    onClick={() => {
+                      if (item.id) {
+                        setExtraCurriID(item.id?.toString());
+                        setTitle(item.title ?? '')
+                        setContent(item.url ?? '')
+                        setStartDateTime(item.activityStart)
+                        setEndDateTime(item.activityEnd);
+                      };
+                    }}
+                  >
+                    <span className="font-bold">{item.title}</span>
+                    <span>
+                      {formatKoreanDateTimeNative(item.activityStart)}~
+                      {formatKoreanDateTimeNative(item.activityEnd)}
+                    </span>
+                    <span>
+                      {formatKoreanDateTimeNative(item.applicationStart)}~
+                      {formatKoreanDateTimeNative(item.applicationEnd)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div></div>
 
           <span className="flex gap-5">
             <span className="text-gray-2 text-base font-normal leading-loose">

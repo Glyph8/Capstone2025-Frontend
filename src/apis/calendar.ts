@@ -2,6 +2,18 @@ import api from "@/apis/index"
 import type { ChangeScheduleRequest, CreateScheduleRequest } from "@/generated-api/Api";
 
 
+
+export const getExtraCurriApi = async (key:string) => {
+    try {
+        const response = api.searchExtracurricular({key:key});
+        return (await response).data.result;
+    }
+    catch(error){
+        console.error("비교과 검색 api 요청 실패 : error ", error);
+        throw new Error("비교과 검색 진행 중 오류 발생"); 
+    }
+} 
+
 export const setAlramSchedule = async (scheduleId:number, isAlarm: boolean) =>{
     try {
         const response = api.setAlarmSchedule({
@@ -19,6 +31,7 @@ export const setAlramSchedule = async (scheduleId:number, isAlarm: boolean) =>{
 export const sendFCMToken = async (token:string) =>{
     try {
         const response = api.updateFcmToken({fcmToken:token})
+        console.log("FCM토큰 전송 성공 : ", (await response).data.result)
         return (await response).data.result;
     }
     catch(error){
