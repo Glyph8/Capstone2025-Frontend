@@ -1,5 +1,6 @@
 import {
   createScheduleApi,
+  deleteDetailScheduleApi,
   getDetailScheduleApi,
   getExtraCurriApi,
   patchScheduleApi,
@@ -13,6 +14,7 @@ import type {
   GetScheduleDetailResponse,
 } from "@/generated-api/Api";
 import { formatKoreanDateTimeNative } from "@/utils/date";
+import { Trash } from "lucide-react";
 
 interface CreateScheduleDialogProps {
   isOpen: boolean;
@@ -173,7 +175,7 @@ export const CreateScheduleDialog = ({
                   onChange={(e) => setExtraQuery(e.target.value)}
                 />
                 <button
-                  className="bg-[#01A862] px-2 rounded-2xl text-white"
+                  className="bg-[#01A862] px-2 rounded-2xl text-white whitespace-nowrap"
                   onClick={async () => {
                     const result = await getExtraCurriApi(extraQuery);
                     setExtraCurri(result?.data);
@@ -182,6 +184,7 @@ export const CreateScheduleDialog = ({
                   검색
                 </button>
               </div>
+              
               <ul className="flex flex-col gap-3 max-h-60 overflow-auto">
                 {(extraCurri ?? []).map((item) => (
                   <li
@@ -250,12 +253,21 @@ export const CreateScheduleDialog = ({
           </span>
         </div>
 
-        <DialogFooter className="flex items-center justify-center">
+        <DialogFooter className="flex items-center justify-center relative">
           <WideAcceptButton
             text={"추가 / 수정"}
             isClickable={true}
             handleClick={handlePostSchedule}
           />
+          <button className="absolute right-2"
+          onClick={()=>{
+            if(scheduleId)
+              deleteDetailScheduleApi(scheduleId)
+              setIsOpen(false);
+              onSuccess();
+          }}>
+            <Trash/>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -51,16 +51,41 @@ export const usePushNotifications = () => {
         if (permission === "granted") {
           console.log("알림 권한이 허용되었습니다.");
 
+          // 추가 - 3차
+          // 2. Service Worker 등록
+          const registration = await navigator.serviceWorker.register(
+            "/firebase-messaging-sw.js"
+          );
+          console.log("Service Worker 등록 성공:", registration);
+
           // 2. FCM 토큰 가져오기
           // 이 getToken이 서비스 워커('firebase-messaging-sw.js')를 등록합니다.
+          // const fcmToken = await getToken(messaging, {
+          //   vapidKey: vapidKey,
+          // });
+
+          // 추가 - 3차
           const fcmToken = await getToken(messaging, {
-            vapidKey: vapidKey,
+            vapidKey: vapidKey, // Firebase Console에서 가져온 키
+            serviceWorkerRegistration: registration,
           });
 
           if (fcmToken) {
             console.log("FCM 토큰:", fcmToken);
             // 3. 백엔드 서버로 토큰 전송
-            await sendTokenToServer(fcmToken);
+            const userToken = localStorage.getItem("access_token");
+
+            if (userToken) {
+              // ⭐️ 2. 토큰이 있을 때만 (로그인 상태일 때만) 서버에 전송합니다.
+              await sendTokenToServer(fcmToken);
+            } else {
+              // ⭐️ 3. 토큰이 없으면 (로그인 전이면) 전송을 건너뜁니다.
+              console.log(
+                "로그인 전이므로 FCM 토큰을 서버에 전송하지 않습니다."
+              );
+              // (고급: 이 fcmToken을 localStorage에 저장했다가
+              // 로그인 성공 시점에 전송하는 로직을 추가할 수도 있습니다.)
+            }
           } else {
             console.log(
               "FCM 토큰을 가져올 수 없습니다. (서비스 워커 등록 확인)"

@@ -23,10 +23,7 @@ const messaging = firebase.messaging();
 // 2. 백그라운드 메시지 핸들러
 // 앱이 탭에 열려있지 않거나 브라우저가 최소화된 경우 이 핸들러가 호출됩니다.
 messaging.onBackgroundMessage((payload) => {
-  console.log(
-    "[firebase-messaging-sw.js] Received background message ",
-    payload
-  );
+  console.log('[Service Worker] 백그라운드 메시지 수신:', payload);
 
   // 브라우저 알림(토스트)을 직접 띄웁니다.
   const notificationTitle = payload.notification.title || "새 알림";
@@ -39,5 +36,30 @@ messaging.onBackgroundMessage((payload) => {
   return self.registration.showNotification(
     notificationTitle,
     notificationOptions
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] 알림 클릭됨:', event.notification);
+  
+  event.notification.close(); // 알림 닫기
+
+  // 특정 URL로 이동하거나 앱 포커스
+  const urlToOpen = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // 이미 열린 창이 있으면 포커스
+        for (const client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // 없으면 새 창 열기
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
   );
 });
