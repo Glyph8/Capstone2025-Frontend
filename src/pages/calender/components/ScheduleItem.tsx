@@ -42,7 +42,7 @@ export const ScheduleItem = ({ event, onClick }: ScheduleItemProps) => {
           <AlarmIconButton
             scheduleId={Number(event.scheduleId)}
             // TODO : 추후 상태 추가
-            initialIsAlarm={false}
+            initialIsAlarm={event.isAlarm ?? false}
           />
         </div>
       </div>

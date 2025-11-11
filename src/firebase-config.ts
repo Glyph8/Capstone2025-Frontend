@@ -4,13 +4,13 @@ import { getMessaging } from "firebase/messaging";
 
 // Firebase 프로젝트 설정 (Firebase 콘솔에서 가져오세요)
 const firebaseConfig = {
-  apiKey: "AIzaSyB7f2IzatJXsuxMZk6BcPsAS5ojuRdN8ds",
-  authDomain: "capstone-5f88f.firebaseapp.com",
-  projectId: "capstone-5f88f",
-  storageBucket: "capstone-5f88f.firebasestorage.app",
-  messagingSenderId: "1094578308157",
-  appId: "1:1094578308157:web:960650dda30eb3cb021654",
-  measurementId: "G-K8GVY0TB1H",
+  apiKey: "AIzaSyByfJGJqNMnxJy7j9EWSDKBvTrDSo1hlH0",
+  authDomain: "capstone-push-d1f0c.firebaseapp.com",
+  projectId: "capstone-push-d1f0c",
+  storageBucket: "capstone-push-d1f0c.firebasestorage.app",
+  messagingSenderId: "567807009346",
+  appId: "1:567807009346:web:6690a850704315da33c3db",
+  measurementId: "G-GWQJ83W4M6",
 };
 
 // Firebase 앱 초기화

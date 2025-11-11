@@ -20,8 +20,8 @@ async function sendTokenToServer(fcmToken: string) {
     //   },
     //   body: JSON.stringify({ fcmToken: fcmToken }),
     // });
-    console.log('fcmToken: ', fcmToken);
-    const response = await sendFCMToken(JSON.stringify({ fcmToken: fcmToken }))
+    console.log("fcmToken: ", fcmToken);
+    const response = await sendFCMToken(JSON.stringify({ fcmToken: fcmToken }));
 
     if (response) {
       console.log("FCM 토큰을 서버에 성공적으로 전송했습니다.");
@@ -38,12 +38,14 @@ export const usePushNotifications = () => {
     // 1. 알림 권한 요청
     async function requestPermissionAndGetToken() {
       if (!vapidKey) {
-    // ⭐️ vapidKey가 .env에서 로드되지 않았을 경우를 대비한 방어 코드
-    console.error("VAPID 키가 로드되지 않았습니다. .env 파일을 확인하세요.");
-    return;
-  }
-// ⭐️ 현재 VAPID 키가 무엇인지 직접 확인
-  console.log("Using VAPID Key:", vapidKey);
+        // ⭐️ vapidKey가 .env에서 로드되지 않았을 경우를 대비한 방어 코드
+        console.error(
+          "VAPID 키가 로드되지 않았습니다. .env 파일을 확인하세요."
+        );
+        return;
+      }
+      // ⭐️ 현재 VAPID 키가 무엇인지 직접 확인
+      console.log("Using VAPID Key:", vapidKey);
       try {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
@@ -93,7 +95,9 @@ export const usePushNotifications = () => {
       });
 
       // 예: React-Toastify 같은 라이브러리로 앱 내 알림 표시
-      toast(`${title}: ${body}`);
+      toast.success(`${title}: ${body}`, {
+        duration: 2000, // 5초 동안 보이기
+      });
     });
 
     // 컴포넌트 언마운트 시 리스너 정리
