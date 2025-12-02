@@ -66,26 +66,39 @@ export const usePushNotifications = () => {
   };
 
   // 5. 알림 구독 (토큰 발급 및 서버 전송)
-  const subscribe = useCallback(async () => {
+const subscribe = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
-    // 1. 로그인 확인
     if (!localStorage.getItem("access_token")) {
       toast.error("로그인이 필요합니다.");
       setIsLoading(false);
-      // (전역 인터셉터가 로그인 페이지로 보낼 것임)
       return; 
     }
 
-    // 2. 권한 확인 및 요청
-    let currentPermission = permission;
+    // [수정 포인트 1] state인 permission 대신, 현재 브라우저의 "진짜 상태"를 즉시 조회
+    let currentPermission = Notification.permission; 
+
+    // [수정 포인트 2] 디버깅을 위해 현재 상태를 확인 (해결 후 삭제)
+    // alert(`현재 권한 상태: ${currentPermission}`); 
+
+    if (currentPermission === 'denied') {
+      // 팝업이 안 뜨는 이유가 바로 이것입니다.
+      toast.error("알림이 차단되어 있습니다. 브라우저 설정 > 사이트 설정에서 알림을 허용해주세요.");
+      setIsLoading(false);
+      setPermission('denied'); // UI 업데이트
+      return;
+    }
+
+    // 권한이 없으면(default) 요청 시도
     if (currentPermission === 'default') {
+      // internalRequestPermission 안에서도 Notification.requestPermission()을 호출함
       currentPermission = await internalRequestPermission();
     }
 
+    // 요청 후에도 granted가 아니면 종료
     if (currentPermission !== 'granted') {
-      toast.error("알림 권한이 허용되어야 구독할 수 있습니다.");
+      toast.error("알림 권한을 허용해야 구독할 수 있습니다.");
       setIsLoading(false);
       return;
     }
