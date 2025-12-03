@@ -1,9 +1,8 @@
-import type { MakeMemberTimetableRequest } from '@/generated-api/Api';
+import type { LookupTimetableResponse, MakeMemberTimetableRequest } from '@/generated-api/Api';
 import type { ChatBotPageState } from '@/types/chatbot-types';
 import type { AddTimeTableState,LoadTableState} from '@/types/timetable-types';
 import { updateTimetable } from '@/utils/timetableUtils';
 import { create } from 'zustand'
-
 
 export const useChatBotPageStore = create<ChatBotPageState>()((set) => ({
     isChatBotOpen: false,
@@ -19,15 +18,17 @@ export const useAddTimeTableStore = create<AddTimeTableState>()((set) => ({
 
 export interface SelectedCellState {
   selectedCell: MakeMemberTimetableRequest[];
+  selectedExistingEvent: LookupTimetableResponse | null;
   updateCell: (cell: MakeMemberTimetableRequest) => void;
   clearCells: () => void;
-  // [추가] 여러 셀을 한 번에 설정하는 액션
   setCells: (cells: MakeMemberTimetableRequest[]) => void; 
+  setSelectedExistingEvent: (event: LookupTimetableResponse | null) => void;
 }
 
 export const useSelectCellStore = create<SelectedCellState>()((set) => ({
   selectedCell: [],
-  
+  selectedExistingEvent: null,
+
   updateCell: (cellToUpdate: MakeMemberTimetableRequest) =>
     set((state) => ({
       selectedCell: updateTimetable(state.selectedCell, cellToUpdate),
@@ -35,41 +36,13 @@ export const useSelectCellStore = create<SelectedCellState>()((set) => ({
 
   clearCells: () => set({ selectedCell: [] }),
 
-  // [추가] 배열을 통째로 받아 상태를 업데이트 (드래그 기능용)
   setCells: (cells: MakeMemberTimetableRequest[]) => set({ selectedCell: cells }),
+  
+  setSelectedExistingEvent: (event) => set({ selectedExistingEvent: event }),
 }));
 
 export const useLoadTableStore = create<LoadTableState>()((set) => ({
-    // 현재 더미 데이터
-    loadTable: [
-        // {
-        //     id: 'event-1',
-        //     day: 'MON',
-        //     startTime: '11:00',
-        //     endTime: '1230',
-        //     eventName: '주간 회의',
-        //     eventDetail: '팀 전체 주간 목표 공유',
-        //     color: '#D1E7DD', // 연한 녹색
-        // },
-        // {
-        //     id: 'event-2',
-        //     day: 'WED',
-        //     startTime: '0900',
-        //     endTime: '1030',
-        //     eventName: '디자인 리뷰',
-        //     eventDetail: '새로운 기능 UI/UX 검토fefaafaefaefefe',
-        //     color: '#CFE2FF', // 연한 파랑
-        // },
-        // {
-        //     id: 'event-3',
-        //     day: 'FRI',
-        //     startTime: '1300',
-        //     endTime: '1430',
-        //     eventName: '개인 프로젝트',
-        //     eventDetail: '',
-        //     color: '#FFF3CD', // 연한 노랑
-        // },
-    ],
+    loadTable: [],
     setLoadTable: (tables) => set(() => ({
         loadTable: [...tables]
     })),
@@ -78,3 +51,4 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
         loadTable: [...state.loadTable, newEvent]
     }))
 }))
+

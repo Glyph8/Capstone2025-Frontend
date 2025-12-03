@@ -115,7 +115,7 @@ const UpdateAcademicInfoPage = () => {
             </div>
 
             <div className="mt-6 py-5 px-5">
-                <WideAcceptButton text="가입 완료" isClickable={true} handleClick={completeSign} />
+                <WideAcceptButton text="변경 사항 저장하기" isClickable={true} handleClick={completeSign} />
             </div>
         </div>
     )

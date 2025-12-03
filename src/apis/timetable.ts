@@ -30,19 +30,3 @@ export const deleteEvent = (deleteTimetableId: number) => api.deleteTimetable({d
         return res.data.result; //boolean 값
     })
     .catch((err) => console.error(err));
-
-// [
-//     {
-//         "day": "MON / TUE / WED / THU / FRI / SAT / SUN",
-//         "startTime": "11:00:00.000000",
-//         "endTime": "11:00:00.000000",
-//         "eventName": "분산시스템과컴퓨팅",
-//         "eventDetail": "신공1201",
-//         "color": "#f6f6f6"
-//     }
-// ] 
-
-// export const sendDummyEventRequest = (event: Event) => {
-//     const { addNewLoadTable } = useLoadTableStore.getState()
-//     addNewLoadTable(event)
-// }

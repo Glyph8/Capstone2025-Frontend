@@ -7,16 +7,17 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { useSelectCellStore, useAddTimeTableStore } from "@/store/store";
-import { sendEventRequest } from "@/apis/timetable";
+import { deleteEvent, patchEvent, sendEventRequest } from "@/apis/timetable";
 import SelectedCell from "./SelectedCell";
 import { Button, Input } from "@headlessui/react";
 import type {
+  ChangeTimetableRequest,
   LocalTime,
   MakeMemberTimetableRequest,
 } from "@/generated-api/Api";
 import { formatLocalTime } from "@/utils/timetableUtils";
+import toast from "react-hot-toast";
 
-// 사용자에게 제공할 컬러 팔레트 (랜덤 대신 선택권 부여)
 const COLOR_PALETTE = [
   "#F87171",
   "#FB923C",
@@ -47,110 +48,136 @@ export const toMinutes = (time: LocalTime | undefined | null): number => {
 };
 
 export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
-  const { selectedCell, clearCells } = useSelectCellStore();
+  const {
+    selectedCell,
+    clearCells,
+    selectedExistingEvent,
+    setSelectedExistingEvent,
+  } = useSelectCellStore();
   const { isEditing, setIsEditing } = useAddTimeTableStore();
 
   const [eventName, setEventName] = useState("");
   const [eventDetail, setEventDetail] = useState("");
   const [selectedColor, setSelectedColor] = useState(COLOR_PALETTE[0]);
 
-  // Drawer가 닫힐 때 상태 초기화
   useEffect(() => {
-    if (!isEditing) {
-      setEventName("");
-      setEventDetail("");
-      setSelectedColor(COLOR_PALETTE[0]);
+    if (isEditing) {
+      if (selectedExistingEvent) {
+        setEventName(selectedExistingEvent.eventName || "");
+        setEventDetail(selectedExistingEvent.eventDetail || "");
+        setSelectedColor(selectedExistingEvent.color || COLOR_PALETTE[0]);
+      } else {
+        setEventName("");
+        setEventDetail("");
+        setSelectedColor(COLOR_PALETTE[0]);
+      }
     }
-  }, [isEditing]);
+  }, [isEditing, selectedExistingEvent]);
+
+  const handleClose = () => {
+    setIsEditing(false);
+    clearCells();
+    setSelectedExistingEvent(null); // 수정 중이던 정보 초기화
+    setEventName("");
+    setEventDetail("");
+  };
+
+  const handleDelete = async () => {
+    if (!selectedExistingEvent?.id) return;
+
+    try {
+      await deleteEvent(selectedExistingEvent.id);
+      await fetchTable();
+      handleClose();
+    } catch (e) {
+      console.error("삭제 실패", e);
+      toast.error("일정 삭제에 실패했습니다.");
+    }
+  };
 
   const handleSave = async () => {
     if (!eventName.trim()) {
-      alert("활동명을 입력해주세요.");
+      toast.error("활동명을 입력해주세요.");
       return;
     }
 
-    if (selectedCell.length === 0) return;
+    if (selectedCell.length === 0) {
+      toast.error("시간이 선택되지 않았습니다.");
+      return;
+    }
 
-    const cellsByDay = selectedCell.reduce((acc, cell) => {
-      const day = cell.day || "MON";
-      if (!acc[day]) acc[day] = [];
-      acc[day].push(cell);
-      return acc;
-    }, {} as Record<string, typeof selectedCell>);
+    try {
+      if (selectedExistingEvent) {
+        const sortedCells = [...selectedCell].sort(
+          (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
+        );
+        const startTime = sortedCells[0].startTime;
+        const endTime = sortedCells[sortedCells.length - 1].endTime;
 
-    const mergedEvents = [];
+        const updateRequest = {
+          id: selectedExistingEvent.id, // 필수
+          day: selectedCell[0].day, // 요일 변경 가능성 고려
+          startTime: formatLocalTime(startTime),
+          endTime: formatLocalTime(endTime),
+          eventName: eventName,
+          eventDetail: eventDetail,
+          color: selectedColor,
+        };
 
-    for (const day in cellsByDay) {
-      const cells = cellsByDay[day];
+        await patchEvent(updateRequest as ChangeTimetableRequest);
+      } else {
+        const cellsByDay = selectedCell.reduce((acc, cell) => {
+          const day = cell.day || "MON";
+          if (!acc[day]) acc[day] = [];
+          acc[day].push(cell);
+          return acc;
+        }, {} as Record<string, typeof selectedCell>);
 
-      // 시간을 기준으로 오름차순 정렬 (10:00, 10:30, 11:00 ...)
-      cells.sort((a, b) => {
-        if (!a.startTime || !b.startTime) return 0;
-        return toMinutes(a.startTime) - toMinutes(b.startTime);
-      });
+        const mergedEvents = [];
+        for (const day in cellsByDay) {
+          const cells = cellsByDay[day];
+          cells.sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+          const start = cells[0].startTime;
+          const end = cells[cells.length - 1].endTime;
 
-      // 병합 시작
-      let currentStart = cells[0].startTime;
-      let currentEnd = cells[0].endTime;
-
-      for (let i = 1; i < cells.length; i++) {
-        const nextCell = cells[i];
-
-        // "현재 덩어리의 끝 시간"과 "다음 셀의 시작 시간"이 같으면 연속된 것임
-        if (toMinutes(currentEnd!) === toMinutes(nextCell.startTime!)) {
-          // 연속됨 -> 끝 시간만 확장
-          currentEnd = nextCell.endTime;
-        } else {
-          // 끊김 -> 지금까지 덩어리를 저장하고 새로운 덩어리 시작
           mergedEvents.push({
-            day: day as any,
-            startTime: formatLocalTime(currentStart),
-            endTime: formatLocalTime(currentEnd),
+            day: day as "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN",
+            // startTime: start,
+            // endTime: end,
+            startTime: formatLocalTime(start),
+            endTime: formatLocalTime(end),
             eventName,
             eventDetail,
             color: selectedColor,
           });
-          currentStart = nextCell.startTime;
-          currentEnd = nextCell.endTime;
         }
+        await sendEventRequest(mergedEvents as MakeMemberTimetableRequest[]);
       }
-      // 마지막 남은 덩어리 추가
-      mergedEvents.push({
-        day: day as any,
-        startTime: formatLocalTime(currentStart),
-        endTime: formatLocalTime(currentEnd),
-        eventName,
-        eventDetail,
-        color: selectedColor,
-      });
-    }
 
-    // --- [서버 전송] ---
-    try {
-      // 스웨거와 일치하지 않지만, 이게 맞음;;
-      await sendEventRequest(mergedEvents as MakeMemberTimetableRequest[]);
+      // 공통 마무리
       await fetchTable();
-      clearCells();
-      setIsEditing(false);
+      handleClose();
     } catch (e) {
       console.error("저장 실패", e);
+      toast.error("일정 저장에 실패했습니다.");
     }
-  };
-
-  const handleClose = () => {
-    setIsEditing(false); // 드로어 닫기
-    clearCells(); // 선택된 셀도 같이 초기화 (선택사항)
   };
 
   return (
-    <Drawer open={isEditing} onOpenChange={setIsEditing} modal={false}>
+    <Drawer
+      open={isEditing}
+      onOpenChange={(open) => !open && handleClose()}
+      modal={false}
+    >
       <DrawerContent
         className="pb-6 focus:outline-none"
         onOpenAutoFocus={(e) => e.preventDefault()}
         onPointerDownOutside={() => {}}
       >
         <DrawerHeader className="flex justify-between items-center">
-          <DrawerTitle className="font-bold text-lg">일정 추가하기</DrawerTitle>
+          <DrawerTitle className="font-bold text-lg">
+            {selectedExistingEvent ? "일정 수정" : "일정 추가"}
+          </DrawerTitle>
           <button
             onClick={handleClose}
             className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
@@ -169,7 +196,6 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
         </DrawerHeader>
 
         <div className="px-5 space-y-6">
-          {/* 1. 선택된 시간 정보 */}
           {selectedCell.length > 0 && (
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
               <SelectedCell
@@ -179,7 +205,6 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
             </div>
           )}
 
-          {/* 2. 입력 폼 */}
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1 block">
@@ -206,12 +231,11 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
             </div>
           </div>
 
-          {/* 3. 색상 선택 (가로 스크롤 혹은 그리드) */}
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">
               색상 선택
             </label>
-            <div className="flex gap-3 overflow-x-auto py-1 no-scrollbar">
+            <div className="flex gap-3 overflow-x-auto py-1 no-scrollbar px-1">
               {COLOR_PALETTE.map((color) => (
                 <button
                   key={color}
@@ -229,14 +253,30 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
           </div>
         </div>
 
-        {/* 4. 하단 버튼 액션 */}
-        <DrawerFooter className="px-5 mt-4">
-          <Button
-            onClick={handleSave}
-            className="w-full bg-[#005B3F] hover:bg-[#004731] h-12 text-md font-semibold"
-          >
-            일정 등록하기
-          </Button>
+        <DrawerFooter className="px-5 mt-4 flex-col gap-2 text-white">
+          {selectedExistingEvent && (
+            <Button
+              className="w-full rounded-[500px] bg-[#01A862]  hover:bg-[#004731] h-12 text-md font-semibold"
+              onClick={handleDelete}
+            >
+              삭제
+            </Button>
+          )}
+          <div className="flex flex-row gap-2">
+            <Button
+              className="w-[50%] rounded-[500px] bg-[#01A862] hover:bg-[#004731] h-12 text-md font-semibold"
+              onClick={handleClose}
+            >
+              취소
+            </Button>
+
+            <Button
+              onClick={handleSave}
+              className="w-[50%] flex-[2] rounded-[500px] bg-[#01A862]  hover:bg-[#004731]"
+            >
+              {selectedExistingEvent ? "수정 완료" : "등록하기"}
+            </Button>
+          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

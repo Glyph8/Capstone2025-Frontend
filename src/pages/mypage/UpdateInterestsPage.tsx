@@ -16,7 +16,7 @@ const UpdateInterestPage = () => {
         try {
             const result = await enrollInterest(interests);
             if (result)
-                navigate('/auth/academic-info')
+                navigate('/main/mypage/profile')
             else
                 alert("try 요청 성공하였으나 result false")
 
