@@ -10,7 +10,11 @@ import { useSelectCellStore, useAddTimeTableStore } from "@/store/store";
 import { sendEventRequest } from "@/apis/timetable";
 import SelectedCell from "./SelectedCell";
 import { Button, Input } from "@headlessui/react";
-import type { LocalTime } from "@/generated-api/Api";
+import type {
+  LocalTime,
+  MakeMemberTimetableRequest,
+} from "@/generated-api/Api";
+import { formatLocalTime } from "@/utils/timetableUtils";
 
 // 사용자에게 제공할 컬러 팔레트 (랜덤 대신 선택권 부여)
 const COLOR_PALETTE = [
@@ -56,7 +60,6 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
       setEventName("");
       setEventDetail("");
       setSelectedColor(COLOR_PALETTE[0]);
-      // clearCells(); // 여기서 clearCells를 하면 닫히자마자 셀 선택이 풀려 시각적으로 어색할 수 있음. 저장 시 혹은 명시적 취소 시 호출 추천.
     }
   }, [isEditing]);
 
@@ -68,9 +71,6 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
 
     if (selectedCell.length === 0) return;
 
-    // --- [알고리즘: 연속된 시간 병합하기] ---
-    // 1. 요일별로 그룹화 (혹시 다른 요일이 섞여 있을 경우 대비)
-    // 현재 UI상 하루만 선택되지만, 확장성을 위해 그룹화가 안전합니다.
     const cellsByDay = selectedCell.reduce((acc, cell) => {
       const day = cell.day || "MON";
       if (!acc[day]) acc[day] = [];
@@ -80,7 +80,6 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
 
     const mergedEvents = [];
 
-    // 2. 각 요일별로 시간 정렬 후 병합
     for (const day in cellsByDay) {
       const cells = cellsByDay[day];
 
@@ -105,8 +104,8 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
           // 끊김 -> 지금까지 덩어리를 저장하고 새로운 덩어리 시작
           mergedEvents.push({
             day: day as any,
-            startTime: currentStart,
-            endTime: currentEnd,
+            startTime: formatLocalTime(currentStart),
+            endTime: formatLocalTime(currentEnd),
             eventName,
             eventDetail,
             color: selectedColor,
@@ -118,8 +117,8 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
       // 마지막 남은 덩어리 추가
       mergedEvents.push({
         day: day as any,
-        startTime: currentStart,
-        endTime: currentEnd,
+        startTime: formatLocalTime(currentStart),
+        endTime: formatLocalTime(currentEnd),
         eventName,
         eventDetail,
         color: selectedColor,
@@ -128,8 +127,8 @@ export default function EditTableDrawer({ fetchTable }: EditTableDrawerProps) {
 
     // --- [서버 전송] ---
     try {
-      // 병합된(mergedEvents) 데이터를 전송
-      await sendEventRequest(mergedEvents);
+      // 스웨거와 일치하지 않지만, 이게 맞음;;
+      await sendEventRequest(mergedEvents as MakeMemberTimetableRequest[]);
       await fetchTable();
       clearCells();
       setIsEditing(false);
