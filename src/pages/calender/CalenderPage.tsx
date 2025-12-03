@@ -7,6 +7,29 @@ import type { YearMonth } from "@/types/calendar-types";
 import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
 
 const CalenderPage = () => {
+  const [dateText, setDateText] = useState("");
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const day = ["일", "월", "화", "수", "목", "금", "토"][now.getDay()];
+
+      const formatted =
+        `${now.getFullYear()}년 ${
+          now.getMonth() + 1
+        }월 ${now.getDate()}일 (${day}) ` +
+        `${String(now.getHours()).padStart(2, "0")}:${String(
+          now.getMinutes()
+        ).padStart(2, "0")}`;
+
+      setDateText(formatted);
+    };
+
+    updateTime(); // 최초 1회 실행
+    const timer = setInterval(updateTime, 1000); // 1초마다 갱신
+
+    return () => clearInterval(timer);
+  }, []);
+
   const today = new Date();
   const nowYear = today.getFullYear();
   const nowMonth = today.getMonth() + 1;
@@ -40,9 +63,13 @@ const CalenderPage = () => {
   return (
     <div className="flex flex-col w-full h-full overflow-y-scroll no-scrollbar">
       {/* 상단바 제거하는 스타일링 고려 */}
-      <UpperNav text="2025년 1학기"></UpperNav>
+      <UpperNav text={dateText}></UpperNav>
       <main className="p-4">
-        <MainCalendar data={data} setRequestYM={setRequestYM} onScheduleChange={fetchData}/>
+        <MainCalendar
+          data={data}
+          setRequestYM={setRequestYM}
+          onScheduleChange={fetchData}
+        />
       </main>
     </div>
   );

@@ -1,99 +1,181 @@
 import UpperNav from "@/components/UpperNav";
 import { ReviewItem } from "./components/ReviewItem";
 import { useEffect, useState } from "react";
-import { getReviewList, postReview, searchReview } from "@/apis/review";
-import { dummyReviewList } from "./constants";
+import {
+  getReviewList,
+  postReview,
+  searchReview,
+  getMyReviewList,
+  searchMyReview,
+  deleteMyReview,
+} from "@/apis/review";
 import type {
-  CreateReviewRequest,
   PageResponseReviewResponse,
+  CreateReviewRequest,
 } from "@/generated-api/Api";
 import { Search } from "lucide-react";
+import { ReviewWriteModal } from "./components/ReviewWriteModal";
+import toast from "react-hot-toast";
+
+// 탭 모드 타입 정의
+type ViewMode = "ALL" | "MY";
+
 const ReviewPage = () => {
-  const [originalReviewList, setOriginalReviewList] =
-    useState<PageResponseReviewResponse>();
-  const [displayedReviewList, setDisplayedReviewList] =
-    useState<PageResponseReviewResponse>();
-
+  // 1. 상태 관리
+  const [reviewList, setReviewList] = useState<PageResponseReviewResponse>({
+    data: [],
+  });
   const [searchText, setSearchText] = useState("");
-  const handleSearchReview = async () => {
-    // 검색어가 비어있으면 아무것도 하지 않거나, 전체 목록을 다시 보여줄 수 있습니다.
-    if (!searchText.trim()) {
-      setDisplayedReviewList(originalReviewList);
-      return;
-    }
+  const [viewMode, setViewMode] = useState<ViewMode>("ALL"); // '전체' vs '내 리뷰'
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태
+
+  // 2. 데이터 불러오기 함수 (재사용을 위해 분리)
+  const fetchReviews = async (mode: ViewMode, query: string = "") => {
     try {
-      const result = await searchReview({ key: searchText });
-      setDisplayedReviewList(result); // 검색 결과를 화면에 표시
+      let result;
+      // 검색어가 있는 경우
+      if (query.trim()) {
+        const searchParam = { key: query };
+        result =
+          mode === "ALL"
+            ? await searchReview(searchParam)
+            : await searchMyReview(searchParam);
+      }
+      // 검색어가 없는 경우 (전체 목록)
+      else {
+        result =
+          mode === "ALL" ? await getReviewList() : await getMyReviewList();
+      }
+      if (result) setReviewList(result);
     } catch (error) {
-      console.error("검색 실패:", error);
-      // 검색 실패 시 사용자에게 알림을 주거나 빈 목록을 보여줄 수 있습니다.
-      setDisplayedReviewList({ ...displayedReviewList, data: [] });
+      console.error("리뷰 로드 실패:", error);
+      toast.error("리뷰 로드 실패");
+      setReviewList({ data: [] }); // 에러 시 빈 배열
     }
-  };
-  // const handlePostReview = async () => {
-  //   const review: CreateReviewRequest = {
-  //     extracurricularId: 18,
-  //     content: "정말 최고의 비교과 활동이었습니다. 다른 사람들도 꼭 해보라고 추천하고 싶어요. 다음에 또 한다면 반드시 참석할 것 같습니다. 최고에요",
-  //     star: "FIVE",
-  //   };
-  //   const response = await postReview(review);
-  //   if (response) console.log("게시 성공");
-  //   else alert("게시 실패");
-  // };
-  const handleSearchTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-    // 검색어를 바꾸면 즉시 원본 리스트로 화면을 되돌립니다.
-    setDisplayedReviewList(originalReviewList);
   };
 
+  // 3. 초기 로드 및 탭 변경 시 데이터 갱신
   useEffect(() => {
-    const process = async () => {
-      try {
-        const result = await getReviewList();
-        // 4. 최초 로딩 시 두 상태를 모두 초기화합니다.
-        setOriginalReviewList(result);
-        setDisplayedReviewList(result);
-      } catch (error) {
-        console.error(error);
-        console.log("더미 리뷰 데이터 로드");
-        setOriginalReviewList(dummyReviewList);
-        setDisplayedReviewList(dummyReviewList);
-      } finally {
-        console.log("Review api finally");
-      }
-    };
-    process();
-  }, []);
+    // 탭이 바뀌면 검색어 초기화 후 해당 탭 데이터 로드
+    setSearchText("");
+    fetchReviews(viewMode, "");
+  }, [viewMode]);
+
+  // 4. 검색 핸들러
+  const handleSearch = async () => {
+    await fetchReviews(viewMode, searchText);
+  };
+
+  // 5. 리뷰 작성 핸들러
+  const handleCreateReview = async (data: CreateReviewRequest) => {
+    try {
+      await postReview(data);
+      toast.success("리뷰가 등록되었습니다.");
+      // 작성 후 목록 갱신 (현재 탭 유지)
+      await fetchReviews(viewMode, searchText);
+    } catch (error) {
+      console.error(error);
+      toast.error("리뷰 등록에 실패했습니다.");
+    }
+  };
+
+  // 6. 리뷰 삭제 핸들러
+  const handleDeleteReview = async (reviewId: number) => {
+    // if(!window.confirm("정말 이 리뷰를 삭제하시겠습니까?")) return;
+
+    try {
+      await deleteMyReview({ deleteReviewId: reviewId });
+      toast.success("삭제되었습니다.");
+      // 삭제 후 목록 갱신
+      await fetchReviews(viewMode, searchText);
+    } catch (error) {
+      console.error(error);
+      toast.error("삭제 실패");
+    }
+  };
+
   return (
-    <div className="w-full h-full bg-white">
-      <UpperNav text={"리뷰"} />
-      <div className="flex flex-col p-4 gap-4">
-        <div className="flex p-2 justify-between items-center rounded-xl  gap-3 bg-[#f9f9f9]">
-          <Search className="flex-1" />
+    <div className="w-full min-h-screen bg-white relative">
+      <UpperNav
+        text={"리뷰"}
+        otherBtn="review"
+        handleBtn={() => setIsModalOpen(true)}
+      />
+
+      {/* 탭 전환 버튼 */}
+      <div className="flex border-b">
+        <button
+          className={`flex-1 py-3 font-bold ${
+            viewMode === "ALL"
+              ? "border-b-2 border-green-600 text-green-600"
+              : "text-gray-400"
+          }`}
+          onClick={() => setViewMode("ALL")}
+        >
+          전체 리뷰
+        </button>
+        <button
+          className={`flex-1 py-3 font-bold ${
+            viewMode === "MY"
+              ? "border-b-2 border-green-600 text-green-600"
+              : "text-gray-400"
+          }`}
+          onClick={() => setViewMode("MY")}
+        >
+          내가 쓴 리뷰
+        </button>
+      </div>
+
+      <div className="flex flex-col p-4 gap-4 pb-20">
+        {" "}
+        {/* pb-20: 플로팅 버튼 여백 확보 */}
+        {/* 검색 창 */}
+        <div className="flex p-2 justify-between items-center rounded-xl gap-3 bg-[#f9f9f9] border focus-within:border-green-500 transition-colors">
+          <Search className="w-5 h-5 text-gray-400 ml-2" />
           <input
             type="text"
-            placeholder="조회할 리뷰 항목을 입력해주세요"
-            className="flex-4 py-2"
-            onChange={handleSearchTextChange}
+            placeholder={viewMode === "ALL" ? "전체 리뷰 검색" : "내 리뷰 검색"}
+            className="flex-1 bg-transparent outline-none py-1"
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             value={searchText}
           />
-          <button className="flex-1" onClick={handleSearchReview}>
+          <button
+            className="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-green-700"
+            onClick={handleSearch}
+          >
             검색
           </button>
         </div>
+        {/* 리뷰 리스트 */}
         <div className="w-full flex flex-col gap-3">
-          {(displayedReviewList?.data ?? []).map((review) => {
-            // return <span>{review.content} {review.star}</span>
-            return (
+          {reviewList?.data && reviewList.data.length > 0 ? (
+            reviewList.data.map((review) => (
               <ReviewItem
-                title={review.title ?? ""}
+                key={review.reviewId}
+                reviewId={review.reviewId!}
+                title={review.title ?? "비교과 활동"}
                 content={review.content ?? ""}
-                star={review.star ?? ""}
+                star={review.star ?? "FIVE"}
+                // '내 리뷰' 탭이거나, (추후 로직) 작성자 ID 체크 로직 추가 가능
+                isMyReview={viewMode === "MY"}
+                onDelete={handleDeleteReview}
               />
-            );
-          })}
+            ))
+          ) : (
+            <div className="text-center text-gray-400 py-10">
+              리뷰가 없습니다.
+            </div>
+          )}
         </div>
       </div>
+
+      {/* 글쓰기 모달 */}
+      <ReviewWriteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateReview}
+      />
     </div>
   );
 };

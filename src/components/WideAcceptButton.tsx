@@ -9,7 +9,7 @@ const WideAcceptButton = ({ text, isClickable, handleClick }: WideAcceptButtonPr
         <>
             {isClickable ? (<>
                 <button type="submit"
-                className="w-[290px] h-[45px] rounded-[500px] bg-[#01A862] flex justify-center items-center"
+                className="w-[290px] h-[45px] rounded-lg bg-[#01A862] flex justify-center items-center"
                     onClick={handleClick}>
                     {/*클릭 가능 상태*/}
                     <div className="w-full h-[27px] flex-shrink-0 text-[#FCFFFF] text-center text-[17px] not-italic font-medium leading-[28px]">
@@ -17,7 +17,7 @@ const WideAcceptButton = ({ text, isClickable, handleClick }: WideAcceptButtonPr
                     </div>
                 </button>
             </>) : (<>
-                <div className="w-[290px] h-[45px] rounded-[500px] bg-[#01A86266] flex justify-center items-center">
+                <div className="w-[290px] h-[45px] rounded-lg bg-[#01A86266] flex justify-center items-center">
                     {/*클릭 불가 상태 회색*/}
                     <div className="w-[162px] h-[27px] flex-shrink-0 text-[#FCFFFF] text-center text-[17px] not-italic font-medium leading-[28px]">
                         {text}

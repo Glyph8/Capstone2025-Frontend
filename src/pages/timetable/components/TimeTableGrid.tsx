@@ -61,7 +61,7 @@ const TimeTableGrid = () => {
   const [selectedEventId, setSelectedEventId] = useState<
     number | null | undefined
   >(null);
-  const { isEditing, setIsEditing } = useAddTimeTableStore();
+  const { setIsEditing } = useAddTimeTableStore();
   const { selectedCell, clearCells, setCells, setSelectedExistingEvent } =
     useSelectCellStore();
   const { loadTable, setLoadTable } = useLoadTableStore();
@@ -354,22 +354,16 @@ const TimeTableGrid = () => {
           const gridColumn = DAY_TO_COL[event.day as keyof typeof DAY_TO_COL];
           const isSelected = selectedEventId === event.id;
 
-          // 현재 이동 중인 이벤트는 약간 투명하게 표시 (원래 위치 표시용)
           const isMovingThis =
             dragMode === "move" && movingEvent?.id === event.id;
 
           return (
             <div
               key={event.id}
-              // [중요] 이벤트 위에서 마우스 누르면 이동 모드 시작
               onMouseDown={(e) => handleEventDragStart(e, event)}
               onTouchStart={(e) => handleEventDragStart(e, event)}
-              // 클릭 시 수정 모드 (드래그가 아니었을 때만)
               onClick={(e) => {
                 e.stopPropagation();
-                // 아주 짧은 클릭이었을 때만 동작하도록 로직을 짤 수도 있으나,
-                // 여기선 MouseUp에서 dragMode가 null로 풀리므로 괜찮음.
-                // 단, handleEnd가 먼저 돌아서 isDragging이 false가 되어야 함.
                 handleEventClick(event);
               }}
               className={`w-full overflow-hidden flex flex-col p-2 rounded-lg transition-all text-gray-800 
@@ -385,7 +379,6 @@ const TimeTableGrid = () => {
             >
               <div className="flex-grow text-white pointer-events-none">
                 {" "}
-                {/* 내부 텍스트 선택 방지 */}
                 <p className="font-bold text-[10px]">{event.eventName}</p>
                 <p className="text-[8px]">{event.eventDetail}</p>
               </div>
@@ -393,7 +386,7 @@ const TimeTableGrid = () => {
           );
         })}
 
-        {/* --- 4. [Ghost UI] 이동 중인 이벤트 미리보기 --- */}
+        {/* --- 이동 중인 이벤트 미리보기 --- */}
         {dragMode === "move" && moveTarget && movingEvent && (
           <div
             className="w-full rounded-lg pointer-events-none shadow-xl border-2 border-dashed border-white z-50 flex flex-col p-2"
@@ -401,7 +394,7 @@ const TimeTableGrid = () => {
               gridColumn: DAY_TO_COL[moveTarget.day],
               gridRow: `${moveTarget.index + 1} / span ${Math.floor(
                 eventDuration / 30
-              )}`, // 시작 인덱스 ~ duration만큼 차지
+              )}`, 
               backgroundColor: movingEvent.color,
               opacity: 0.8,
             }}
