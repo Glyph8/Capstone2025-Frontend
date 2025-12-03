@@ -14,6 +14,19 @@ export const getMyInfo = () => api.lookupMemberInfo()
     }
     );
 
+export const getMyInterest = () => api.lookupInterest()
+    .then(response => {
+        console.log(response.data)
+        return response.data.result
+    }
+    )
+    .catch(error => {
+        console.log("멤버 정보 조회 api 에러 발생")
+        console.error(error)
+        throw new Error(error);
+    }
+    );
+
 export const getMyHistoryList = async () => {
     try {
         const response = await api.lookupMyExtracurricular();

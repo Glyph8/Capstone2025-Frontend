@@ -1,14 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import UpperNav from "../../components/UpperNav";
-import WideAcceptButton from "../../components/WideAcceptButton";
 import { useEffect, useState } from "react";
 import { getMyInfo } from "@/apis/mypage";
 import type { LookupMemberInfoResponse } from "@/generated-api/Api";
-import type {
-  AcademicStatus,
-  KoreanAcademicStatus,
-} from "@/types/mypage-types";
+import type { AcademicStatus, KoreanAcademicStatus } from "@/types/mypage-types";
 import ScheduleNotificationSwitch from "./ScheduleNotificationSwitch";
+import UpperNav from "../../components/UpperNav";
+import WideAcceptButton from "../../components/WideAcceptButton";
+import Skeleton from "@/components/Skeleton"; // 위에서 만든 스켈레톤
 
 const ACADEMIC_STATUS_MAP: Record<AcademicStatus, KoreanAcademicStatus> = {
   ENROLLED: "재학",
@@ -16,45 +14,60 @@ const ACADEMIC_STATUS_MAP: Record<AcademicStatus, KoreanAcademicStatus> = {
   GRADUATED: "졸업",
 };
 
+// 🎨 스타일링 된 섹션 아이템 (재사용성)
+const MenuSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="w-full mb-6">
+    <h3 className="text-sm font-semibold text-gray-500 mb-2 px-1">{title}</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      {children}
+    </div>
+  </section>
+);
+
+const MenuItem = ({ 
+  label, 
+  value, 
+  onClick, 
+  isLink = false,
+  rightElement 
+}: { 
+  label: string; 
+  value?: string | number; 
+  onClick?: () => void; 
+  isLink?: boolean;
+  rightElement?: React.ReactNode 
+}) => (
+  <div 
+    onClick={onClick}
+    className={`
+      flex justify-between items-center p-4 min-h-[56px] bg-white border-b border-gray-100 last:border-none
+      ${onClick ? "cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors" : ""}
+    `}
+  >
+    <span className="text-gray-700 font-medium">{label}</span>
+    <div className="flex items-center gap-2">
+      {value && <span className="text-gray-500 text-sm">{value}</span>}
+      {rightElement}
+      {isLink && <img src="/icons/arrow-right.svg" alt="이동" className="w-5 h-5 opacity-40" />}
+    </div>
+  </div>
+);
+
 const MyPage = () => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<LookupMemberInfoResponse>({
-    id: -1,
-    name: "사용자 이름을 불러오는 중입니다",
-    email: "~~@konkuk.ac.kr",
-    academicStatus: "ENROLLED",
-    college: "공과대학",
-    department: "컴퓨터공학부",
-    grade: 1,
-  });
-
-  const handleAcademicInfo = () => {
-    // navigate("/main/mypage/academic-info");
-    navigate("/main/mypage/academic-info");
-  };
-
-  const handleInterest = () => {
-    navigate("/main/mypage/interest");
-  };
-
-  const handleReviewBtn = () => {
-    navigate("/main/mypage/history");
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    // 필요시, 전역 상태, 캐시, 리프레쉬 토큰도 제거
-    navigate("/auth/login");
-  };
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  const [profile, setProfile] = useState<LookupMemberInfoResponse | null>(null);
 
   const getMyProfile = async () => {
     try {
+      setLoading(true);
       const profileData = await getMyInfo();
       if (profileData) setProfile(profileData);
-      else console.log(profileData, "undefinded 가능성 있음");
     } catch (error) {
-      console.error("시간표 불러오기 실패", error);
-      throw error;
+      console.error("프로필 로딩 실패", error);
+      // 에러 처리 (토스트 등)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,73 +75,95 @@ const MyPage = () => {
     getMyProfile();
   }, []);
 
+  const handleLogout = () => {
+    if(window.confirm("정말 로그아웃 하시겠습니까?")) {
+        localStorage.removeItem("access_token");
+        navigate("/auth/login");
+    }
+  };
+
   return (
-    <div className="w-full h-full">
-      <UpperNav text="회원정보" />
-      <div className="w-full bg-white px-11">
-        <nav className="flex flex-col justify-start items-start pt-8">
-          <div className="w-full h-12 text-Schemes-On-Surface text-xl font-semibold leading-7">
-            회원 정보 수정
+    <div className="w-full min-h-screen bg-gray-50 pb-20">
+      <UpperNav text="마이페이지" />
+      
+      <main className="w-full px-5 pt-6">
+        {/* 1. 프로필 헤더 (강조 영역) */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-3xl mb-3 shadow-inner">
+            {/* 아바타 이미지가 없다면 이모지나 첫 글자로 대체 */}
+            🧑‍💻
           </div>
-
-          <div className="w-full flex flex-col gap-2">
-            <div className="flex flex-col gap-3 pb-3">
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                이름 : {profile.name}
-              </div>
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                email : {profile.email}
-              </div>
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                소속 대학 : {profile.college}
-              </div>
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                학과 : {profile.department}
-              </div>
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                학년 : {profile.grade}
-              </div>
-              <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
-                현재 학적 :{" "}
-                {ACADEMIC_STATUS_MAP[profile.academicStatus ?? "ENROLLED"]}
-              </div>
-            </div>
-
-            <div className="h-14 flex justify-between items-center text-black text-base font-light leading-none tracking-wide">
-              <h2>학적정보 수정</h2>
-              <button onClick={handleAcademicInfo}>
-                <img src="/icons/arrow-right.svg" alt="다음버튼" />
-              </button>
-            </div>
-
-            <div className="h-14 flex justify-between items-center text-black text-base font-light font-['Pretendard'] leading-none tracking-wide">
-              <h2>관심 카테고리 수정</h2>
-              <button onClick={handleInterest}>
-                <img src="/icons/arrow-right.svg" alt="다음 버튼" />
-              </button>
-            </div>
-            <nav className="h-14 items-center flex justify-between">
-              <h2>알림 설정</h2>
-              <ScheduleNotificationSwitch />
-            </nav>
-          </div>
-        </nav>
-
-        <div className="w-full flex flex-col justify-center items-center mt-16">
-          <WideAcceptButton
-            text="히스토리 조회 및 리뷰작성"
-            isClickable={true}
-            handleClick={handleReviewBtn}
-          />
-          <div
-            className="mt-32 text-black text-sm font-normal
-            underline leading-loose"
-            onClick={handleLogout}
-          >
-            로그아웃
-          </div>
+          {loading ? (
+             <div className="flex flex-col items-center gap-2">
+               <Skeleton className="w-32 h-6" />
+               <Skeleton className="w-48 h-4" />
+             </div>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold text-gray-900">{profile?.name}</h2>
+              <p className="text-gray-500 text-sm">{profile?.email}</p>
+            </>
+          )}
         </div>
-      </div>
+
+        {/* 2. 학적 정보 섹션 (읽기/수정 복합) */}
+        <MenuSection title="학적 정보">
+          {loading ? (
+             <div className="p-4 space-y-4">
+               <Skeleton className="w-full h-6" />
+               <Skeleton className="w-full h-6" />
+             </div>
+          ) : (
+            <>
+              <MenuItem label="단과대학" value={profile?.college} />
+              <MenuItem label="학과" value={profile?.department} />
+              <MenuItem label="학년" value={`${profile?.grade}학년`} />
+              <MenuItem 
+                label="현재 학적" 
+                value={ACADEMIC_STATUS_MAP[profile?.academicStatus ?? "ENROLLED"]} 
+              />
+              {/* 수정 페이지로 이동하는 명확한 진입점 */}
+              <MenuItem 
+                label="학적 정보 수정하기" 
+                isLink 
+                onClick={() => navigate("/main/mypage/academic-info")}
+                value=""
+              />
+            </>
+          )}
+        </MenuSection>
+
+        {/* 3. 설정 및 관리 섹션 */}
+        <MenuSection title="설정 및 관리">
+            {/* 관심사 수정 */}
+            <MenuItem 
+                label="관심 카테고리 설정" 
+                isLink 
+                onClick={() => navigate("/main/mypage/interest")} 
+            />
+            
+            {/* 알림 설정 (스위치 컴포넌트 통합) */}
+            <MenuItem 
+                label="스케쥴 알림 받기" 
+                rightElement={<ScheduleNotificationSwitch />}
+            />
+        </MenuSection>
+
+        {/* 4. 활동 관리 (CTA 강조) */}
+        <div className="mt-8 mb-12 flex flex-col justify-center items-center">
+            <WideAcceptButton
+                text="히스토리 조회 및 리뷰 작성"
+                isClickable={true}
+                handleClick={() => navigate("/main/mypage/history")}
+            />
+            <button 
+                onClick={handleLogout}
+                className="w-full mt-4 py-3 text-sm text-gray-400 hover:text-gray-600 underline transition-colors"
+            >
+                로그아웃
+            </button>
+        </div>
+      </main>
     </div>
   );
 };
