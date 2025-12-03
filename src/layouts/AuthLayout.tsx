@@ -15,7 +15,7 @@ const AuthLayout = () => {
                 )
             )}
             <main className="flex-1 flex flex-col w-full bg-[#ffffff]">
-                <Outlet /> {/* LoginPage, SignupPage 등이 여기에 렌더링됨 */}
+                <Outlet />
             </main>
         </div>
     )

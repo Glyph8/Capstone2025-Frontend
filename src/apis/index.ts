@@ -24,14 +24,14 @@ baseApi.instance.interceptors.response.use(
     // 2. 에러가 발생했을 때 처리합니다.
     (error) => {
         // error.response가 존재하고, status 코드가 401일 때
-        if (error.response?.status === 401 || error.response?.status === 403) {
-            console.error("인증 에러! 로그인이 필요합니다.");
+        // if (error.response?.status === 401 || error.response?.status === 403) {
+        //     console.error("인증 에러! 로그인이 필요합니다.");
 
-            // 기존 토큰을 삭제합니다.
-            localStorage.removeItem("access_token");
-            // 로그인 페이지로 이동시킵니다.
-            window.location.href = "/auth/login";
-        }
+        //     // 기존 토큰을 삭제합니다.
+        //     localStorage.removeItem("access_token");
+        //     // 로그인 페이지로 이동시킵니다.
+        //     window.location.href = "/auth/login";
+        // }
         
         // 처리한 에러를 다시 throw하여, API를 호출한 쪽에서도 에러를 인지할 수 있게 합니다.
         return Promise.reject(error);

@@ -1,6 +1,6 @@
 import type { MakeMemberTimetableRequest } from '@/generated-api/Api';
 import type { ChatBotPageState } from '@/types/chatbot-types';
-import type { AddTimeTableState, PresetState, LoadTableState} from '@/types/timetable-types';
+import type { AddTimeTableState,LoadTableState} from '@/types/timetable-types';
 import { updateTimetable } from '@/utils/timetableUtils';
 import { create } from 'zustand'
 
@@ -12,61 +12,32 @@ export const useChatBotPageStore = create<ChatBotPageState>()((set) => ({
 
 export const useAddTimeTableStore = create<AddTimeTableState>()((set) => ({
     isEditing: false,
-    setIsEditing: () => set((state) => ({ isEditing: !state.isEditing })),
+    setToggle : () => set((state) => ({ isEditing: !state.isEditing })),
+    setIsEditing: (v) => set(() => ({ isEditing: v })),
 }));
 
 
 export interface SelectedCellState {
-    selectedCell: MakeMemberTimetableRequest[];
-    // 여러 셀을 한번에 추가/제거하는 대신, 하나씩 처리하는 액션으로 변경하는 것이 좋습니다.
-    updateCell: (cell: MakeMemberTimetableRequest) => void;
-    clearCells: () => void;
+  selectedCell: MakeMemberTimetableRequest[];
+  updateCell: (cell: MakeMemberTimetableRequest) => void;
+  clearCells: () => void;
+  // [추가] 여러 셀을 한 번에 설정하는 액션
+  setCells: (cells: MakeMemberTimetableRequest[]) => void; 
 }
 
 export const useSelectCellStore = create<SelectedCellState>()((set) => ({
-    selectedCell: [],
-    // setSelectedCell: (newCell: MakeMemberTimetableRequest[]) => set((state) => {})
-     updateCell: (cellToUpdate: MakeMemberTimetableRequest) => set((state: { selectedCell: MakeMemberTimetableRequest[]; }) => ({
-        selectedCell: updateTimetable(state.selectedCell, cellToUpdate)
+  selectedCell: [],
+  
+  updateCell: (cellToUpdate: MakeMemberTimetableRequest) =>
+    set((state) => ({
+      selectedCell: updateTimetable(state.selectedCell, cellToUpdate),
     })),
-     clearCells: () => set({
-        selectedCell: [] // 그냥 selectedCell을 빈 배열로 교체
-    }),
+
+  clearCells: () => set({ selectedCell: [] }),
+
+  // [추가] 배열을 통째로 받아 상태를 업데이트 (드래그 기능용)
+  setCells: (cells: MakeMemberTimetableRequest[]) => set({ selectedCell: cells }),
 }));
-
-
-export const usePresetStore = create<PresetState>()((set) => ({
-    presets: [
-        {
-            id: "1",
-            eventName: '컴퓨터네트워크2',
-            eventDetail: '공B471',
-            color: '#005B3F'
-        },
-        {
-            id: "2",
-            eventName: '컴퓨터네트워크3',
-            eventDetail: '공B4712',
-            color: '#005B3F'
-        },
-        {
-            id: "3",
-            eventName: '네트워크2',
-            eventDetail: 'B471',
-            color: '#005B3F'
-        },
-        {
-            id: "4",
-            eventName: '졸업 프로젝트',
-            eventDetail: 'B471',
-            color: '#005B3F'
-        }
-    ],
-
-    setPresets: () => set(state => ({
-        presets: state.presets
-    }))
-}))
 
 export const useLoadTableStore = create<LoadTableState>()((set) => ({
     // 현재 더미 데이터
@@ -107,13 +78,3 @@ export const useLoadTableStore = create<LoadTableState>()((set) => ({
         loadTable: [...state.loadTable, newEvent]
     }))
 }))
-
-// export interface SelectedCellState {
-//     selectedCell: selectedTime[];
-//     setSelectedCell: (newCell: selectedTime) => void;
-// }
-
-// export interface selectedTime {
-//     timeInfo: string;
-//     dayInfo: string;
-// }

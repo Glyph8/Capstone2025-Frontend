@@ -12,7 +12,7 @@ const TextInputForm = ({ label, isError, isPW, data, handleChange,  ...rest }: T
     const inputType = isPW ? "password" : "text";
 
     return (
-        <div >
+        <div className="w-full">
             {/* input label */}
             <div className="w-full h-6 text-left justify-start text-black text-xs font-light font-['Pretendard'] leading-7">
                 <label htmlFor={rest.id || rest.name}>
@@ -29,8 +29,8 @@ const TextInputForm = ({ label, isError, isPW, data, handleChange,  ...rest }: T
                 {...rest}
             />
             {/* input 아래 초록/빨강 바 */}
-            {!isError ? <div className="w-72 h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
-                : <div className="w-72 h-0 outline-1 outline-offset-[-0.50px] outline-red-700"></div>}
+            {!isError ? <div className="w-full h-0 outline-1 outline-offset-[-0.50px] outline-emerald-600"></div>
+                : <div className="w-full h-0 outline-1 outline-offset-[-0.50px] outline-red-700"></div>}
 
         </div>
     )

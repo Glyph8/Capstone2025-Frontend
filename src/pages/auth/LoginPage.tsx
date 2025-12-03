@@ -26,10 +26,10 @@ const LoginPage = () => {
 
   return (
     <form
-      className="w-full flex flex-col justify-start items-center"
+      className="w-full flex flex-col justify-start items-center px-5"
       onSubmit={login}
     >
-      <nav className="flex flex-col justify-start items-start mt-8">
+      <nav className="w-full flex flex-col justify-start items-start mt-8">
         <div className="w-full h-12 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
           로그인
         </div>
@@ -80,7 +80,7 @@ const LoginPage = () => {
         </span>
       </div>
 
-      <div className="absolute bottom-22">
+      <div className="w-full flex justify-center mt-22">
         <button
           type="submit"
           className="w-[290px] h-[45px] rounded-[500px] bg-[#01A862] flex justify-center items-center"

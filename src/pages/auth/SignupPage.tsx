@@ -40,9 +40,8 @@ const SignupPage = () => {
 
     }
     return (
-        <div className="w-full flex flex-col justify-center items-center">
-
-            <div>
+        <div className="w-full flex flex-col justify-center items-center px-5">
+            <div className="w-full">
                 <nav className="flex flex-col justify-start items-start mt-8">
                     <div className="w-full h-12 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                         회원가입
@@ -58,7 +57,7 @@ const SignupPage = () => {
             </div>
 
             {!isSendMail ? (
-                <div className="mt-6">
+                <div className="mt-16">
                     <WideAcceptButton text="인증 메일 요청" isClickable={true} handleClick={() => {
                         requestMail(email)
                     }} />
@@ -69,7 +68,7 @@ const SignupPage = () => {
                     {isVerifyed ? (
                         <SetPassword />
                     ) :
-                        <div className="mt-6">
+                        <div className="mt-16">
                             <WideAcceptButton text="인증하기" isClickable={true} handleClick={() => {
                                 verifyByCode(email, verifyCode);
                             }} />

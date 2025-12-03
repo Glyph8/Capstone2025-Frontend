@@ -12,6 +12,8 @@ import MyPage from "../pages/mypage/MyPage.tsx";
 import SetInterestPage from "../pages/auth/SetInterestPage.tsx";
 import SetAcademicInfoPage from "../pages/auth/SetAcademicInfoPage.tsx";
 import HistoryPage from "../pages/mypage/history/HistoryPage.tsx";
+import UpdateAcademicInfoPage from "@/pages/mypage/UpdateAcademicInfoPage.tsx";
+import UpdateInterestPage from "@/pages/mypage/UpdateInterestsPage.tsx";
 
 const router = createBrowserRouter([
     {
@@ -68,6 +70,14 @@ const router = createBrowserRouter([
                     {
                         path: 'profile',
                         element: <MyPage />
+                    },
+                    {
+                        path: 'academic-info',
+                        element: <UpdateAcademicInfoPage />
+                    },
+                    {
+                        path: 'interest',
+                        element: <UpdateInterestPage />
                     },
                     {
                         path: 'history',

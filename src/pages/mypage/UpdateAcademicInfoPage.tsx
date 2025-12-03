@@ -6,8 +6,10 @@ import { enrollAcademicInfo } from "../../apis/auth";
 
 import { useNavigate } from "react-router-dom";
 import type { AcademicInfo } from "@/types/auth-types";
+import toast from "react-hot-toast";
+import UpperNav from "@/components/UpperNav";
 
-const SetAcademicInfoPage = () => {
+const UpdateAcademicInfoPage = () => {
     const navigate = useNavigate()
 
     const [userAcademicStatus, setUserAcademicStatus] = useState("ENROLLED");
@@ -27,19 +29,20 @@ const SetAcademicInfoPage = () => {
         try {
             const finalResult = await enrollAcademicInfo(academicInfo as AcademicInfo);
             if (finalResult)
-                navigate('/main/timetable')
+                navigate('/main/mypage/profile')
             else
                 console.log("try 성공, result false")
         }
         catch {
-            alert("compleSign 요청 에러 발생")
+            toast.error("compleSign 요청 에러 발생")
         }
     }
 
     return (
-        <div className="flex flex-col justify-between items-center ml-auto mr-auto w-full px-5">
-
-            <div className="w-full mt-8">
+        <div className="flex flex-col justify-between items-center ml-auto mr-auto w-full ">
+            <UpperNav text="학적 정보 수정" />
+            
+            <div className="w-full mt-8 px-5">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     재학 상태
                 </div>
@@ -62,7 +65,7 @@ const SetAcademicInfoPage = () => {
                 </div>
             </div>
 
-            <div className="w-full mt-9">
+            <div className="w-full mt-9 px-5">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     학년
                 </div>
@@ -90,32 +93,32 @@ const SetAcademicInfoPage = () => {
                 </div>
             </div>
 
-            <div className="w-full flex flex-col justify-center mt-9">
+            <div className="px-5 w-full flex flex-col justify-center mt-9">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     단과 대학
                 </div>
                 <TextInputForm label="소속 단과대학을 입력해주세요" placeholder="예 : 공과대학" isError={false} isPW={false} data={userCollege} handleChange={setUserCollege} />
             </div>
 
-            <div className="w-full mt-9">
+            <div className="w-full mt-9 px-5">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     학과
                 </div>
                 <TextInputForm label="소속 학과를 입력해주세요" placeholder="예: 컴퓨터공학부" isError={false} isPW={false} data={userDepartment} handleChange={setUserDepartment} />
             </div>
 
-            <div className="w-full mt-9">
+            <div className="w-full mt-9 px-5">
                 <div className="w-28 text-Schemes-On-Surface text-xl font-semibold font-['Pretendard'] leading-7">
                     이름
                 </div>
                 <TextInputForm label="챗봇에게 불릴 이름을 입력해주세요." placeholder="예: 김건국" isError={false} isPW={false} data={userName} handleChange={setUserName} />
             </div>
 
-            <div className="mt-6 py-5">
+            <div className="mt-6 py-5 px-5">
                 <WideAcceptButton text="가입 완료" isClickable={true} handleClick={completeSign} />
             </div>
         </div>
     )
 }
 
-export default SetAcademicInfoPage;
+export default UpdateAcademicInfoPage;

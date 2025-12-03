@@ -29,6 +29,7 @@ const MyPage = () => {
   });
 
   const handleAcademicInfo = () => {
+    // navigate("/main/mypage/academic-info");
     navigate("/main/mypage/academic-info");
   };
 
@@ -71,7 +72,7 @@ const MyPage = () => {
           </div>
 
           <div className="w-full flex flex-col gap-2">
-            <div className="flex flex-col gap-2 pb-3">
+            <div className="flex flex-col gap-3 pb-3">
               <div className="flex justify-start items-center text-black text-base font-light leading-none tracking-wide">
                 이름 : {profile.name}
               </div>
@@ -106,12 +107,13 @@ const MyPage = () => {
                 <img src="/icons/arrow-right.svg" alt="다음 버튼" />
               </button>
             </div>
+            <nav className="h-14 items-center flex justify-between">
+              <h2>알림 설정</h2>
+              <ScheduleNotificationSwitch />
+            </nav>
           </div>
         </nav>
-        <nav className="flex justify-between">
-          <h2>알림 설정</h2>
-          <ScheduleNotificationSwitch />
-        </nav>
+
         <div className="w-full flex flex-col justify-center items-center mt-16">
           <WideAcceptButton
             text="히스토리 조회 및 리뷰작성"

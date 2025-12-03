@@ -5,7 +5,7 @@ export type dayString = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 // 시간표 추가 UI on / off 상태
 export interface AddTimeTableState {
     isEditing: boolean;
-    setIsEditing: () => void;
+    setIsEditing: (v:boolean) => void;
 }
 
 // 셀 클릭 시 전달할 정보를 담는 type - Event 기반으로 수정 필요.

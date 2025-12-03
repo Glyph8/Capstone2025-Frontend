@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { enrollInterest } from "../../apis/auth";
 import WideAcceptButton from "../../components/WideAcceptButton";
-import InterestGrid from "./InterestGrid";
 import { useNavigate } from "react-router-dom";
+import InterestGrid from "../auth/InterestGrid";
+import UpperNav from "@/components/UpperNav";
 
-const SetInterestPage = () => {
+const UpdateInterestPage = () => {
     const [interests, setInterests] = useState<string[]>([])
     const navigate = useNavigate()
 
@@ -25,8 +26,9 @@ const SetInterestPage = () => {
 
     }
     return (
-        <div className="w-full flex flex-col justify-between items-center px-5">
-            <div className="w-full">
+        <div className="w-full flex flex-col justify-between items-center ">
+            <UpperNav text="관심 키워드 수정" />
+            <div className="w-full px-5">
                 <nav className="flex flex-col justify-start items-start mt-8">
                     <div className="w-full h-12 text-black text-xl font-semibold font-['Pretendard'] leading-7">
                         관심 정보
@@ -40,11 +42,11 @@ const SetInterestPage = () => {
                 </div>
             </div>
 
-            <div className="absolute bottom-22">
-                <WideAcceptButton text={"마지막으로"} isClickable={true} handleClick={handleClick} />
+            <div className="absolute bottom-22 px-5">
+                <WideAcceptButton text={"변경 사항 저장하기"} isClickable={true} handleClick={handleClick} />
             </div>
         </div>
     )
 }
 
-export default SetInterestPage;
+export default UpdateInterestPage;
