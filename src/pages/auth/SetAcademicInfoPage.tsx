@@ -2,22 +2,30 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { enrollAcademicInfo } from "../../apis/auth";
-import type { AcademicInfo } from "@/types/auth-types"; // 타입 경로 확인 필요
+import type { AcademicInfo } from "@/types/auth-types";
 import WideAcceptButton from "../../components/WideAcceptButton";
 import SelectItemButton from "../../components/SelectItemButton";
 import TextInputForm from "../../components/TextInputForm";
 
+// ✅ 수정됨: 컴포넌트 외부로 이동 (이제 리렌더링 시에도 새로 생성되지 않음)
+const SectionContainer = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="mb-6">
+    <h3 className="text-sm font-semibold text-gray-500 mb-2 px-1 ml-1">{title}</h3>
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-5">
+      {children}
+    </div>
+  </section>
+);
+
 const SetAcademicInfoPage = () => {
   const navigate = useNavigate();
 
-  // 초기값 설정
   const [userAcademicStatus, setUserAcademicStatus] = useState("ENROLLED");
   const [userGrade, setUserGrade] = useState(1);
   const [userCollege, setUserCollege] = useState("");
   const [userDepartment, setUserDepartment] = useState("");
   const [userName, setUserName] = useState("");
 
-  // 유효성 검사 (모든 텍스트 필드가 입력되었는지 확인)
   const isValid = useMemo(() => {
     return (
       userCollege.trim().length > 0 &&
@@ -54,19 +62,8 @@ const SetAcademicInfoPage = () => {
     }
   };
 
-  // 🎨 공통 섹션 래퍼 (Update 페이지와 통일)
-  const SectionContainer = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <section className="mb-6">
-      <h3 className="text-sm font-semibold text-gray-500 mb-2 px-1 ml-1">{title}</h3>
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-5">
-        {children}
-      </div>
-    </section>
-  );
-
   return (
     <div className="w-full min-h-screen bg-gray-50 pb-28">
-      {/* 상단 헤더 */}
       <header className="px-5 pt-8 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">학적 정보 입력</h1>
         <p className="text-sm text-gray-500 leading-relaxed">
@@ -76,7 +73,6 @@ const SetAcademicInfoPage = () => {
       </header>
 
       <main className="w-full px-5">
-        {/* 1. 기본 학적 상태 섹션 */}
         <SectionContainer title="기본 정보">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">재학 상태</label>
@@ -114,7 +110,6 @@ const SetAcademicInfoPage = () => {
           </div>
         </SectionContainer>
 
-        {/* 2. 소속 및 이름 입력 섹션 */}
         <SectionContainer title="상세 정보">
           <div className="flex flex-col gap-6">
             <div>
@@ -159,15 +154,12 @@ const SetAcademicInfoPage = () => {
         </SectionContainer>
       </main>
 
-      {/* 하단 고정 버튼 (Sticky Footer) */}
-      <div className="flex justify-center items-center p-5 pb-8 safe-area-bottom fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent z-10">
-        <div className="w-full max-w-md">
+      <div className="flex justify-center items-center p-5 pb-8 safe-area-bottom bg-gradient-to-t from-gray-50 via-gray-50 to-transparent z-10">
             <WideAcceptButton
             text="가입 완료"
-            isClickable={isValid} // 모든 정보 입력 시에만 활성화
+            isClickable={isValid}
             handleClick={completeSign}
             />
-        </div>
       </div>
     </div>
   );

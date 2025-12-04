@@ -51,13 +51,11 @@ const SetInterestPage = () => {
 
       {/* 하단 고정 버튼 (Sticky Footer) */}
       <div className="flex justify-center items-center p-5 pb-8 safe-area-bottom fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent z-10">
-        <div className="w-full max-w-md"> {/* max-w-md로 너무 넓어지는 것 방지 */}
             <WideAcceptButton
             text="다음으로"
             isClickable={true} 
             handleClick={handleSubmit}
             />
-        </div>
       </div>
     </div>
   );

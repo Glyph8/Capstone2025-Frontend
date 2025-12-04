@@ -11,6 +11,17 @@ import TextInputForm from "../../components/TextInputForm";
 import UpperNav from "@/components/UpperNav";
 import Skeleton from "@/components/Skeleton";
 
+  // 🎨 공통 섹션 래퍼 (MyPage와 디자인 통일)
+  const SectionContainer = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <section className="mb-6">
+      <h3 className="text-sm font-semibold text-gray-500 mb-2 px-1 ml-1">{title}</h3>
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-5">
+        {children}
+      </div>
+    </section>
+  );
+
+
 const UpdateAcademicInfoPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
@@ -78,15 +89,6 @@ const UpdateAcademicInfoPage = () => {
     }
   };
 
-  // 🎨 공통 섹션 래퍼 (MyPage와 디자인 통일)
-  const SectionContainer = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <section className="mb-6">
-      <h3 className="text-sm font-semibold text-gray-500 mb-2 px-1 ml-1">{title}</h3>
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col gap-5">
-        {children}
-      </div>
-    </section>
-  );
 
   // 로딩 화면 (Skeleton)
   if (isLoading) {

@@ -123,7 +123,7 @@ const handleItemClick = (item: ReviewResponse) => {
                             {filteredHistory.length > 0 ? (
                                 filteredHistory.map((item) => (
                                     <HistoryItem 
-                                        key={item.reviewId || item.extracurricularId || Math.random()} // 고유 키 보장
+                                        key={item.id || item.extracurricularId || Math.random()} // 고유 키 보장
                                         title={item.title || "제목 없음"} 
                                         isReviewed={!!item.star} // star가 있으면 리뷰 완료로 간주
                                         onClick={() => handleItemClick(item)}
