@@ -308,7 +308,7 @@ export interface ReviewResponse {
    * @format int64
    * @example 1
    */
-  reviewId?: number;
+  id?: number;
   /**
    * 관련된 비교과 ID
    * @format int64

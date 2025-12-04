@@ -25,6 +25,7 @@ export const ReviewWriteModal = ({ isOpen, onClose, onSubmit, initialData }: Rev
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        console.log("전달받은 초기 데이터:", initialData);
         setSelectedExtra(initialData); // 외부에서 받은 데이터로 설정
         setKeyword(initialData.title ?? "");
       } else {
@@ -67,7 +68,8 @@ export const ReviewWriteModal = ({ isOpen, onClose, onSubmit, initialData }: Rev
   const handleSubmit = async () => {
     if (!selectedExtra) return toast.error("리뷰를 작성할 비교과 활동을 선택해주세요.");
     if (!content.trim()) return toast.error("내용을 입력해주세요.");
-    
+    if(!selectedExtra.id) return toast.error("비교과를 선택해주세요");
+
     const requestData: CreateReviewRequest = {
       extracurricularId: selectedExtra.id, // 선택된 비교과 ID 사용
       content,

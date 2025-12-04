@@ -48,20 +48,33 @@ const HistoryPage = () => {
     }, [searchText, historyList]);
 
     // 4. 핸들러 함수들
-    const handleItemClick = (item: ReviewResponse) => {
-        // 이미 리뷰를 쓴 항목은 클릭 방지 (HistoryItem에서도 막지만 이중 방어)
-        if (item.star) return;
+const handleItemClick = (item: ReviewResponse) => {
+    // 1. 디버깅 로그 (확인용)
+    console.log("클릭한 아이템:", item); 
 
-        // ReviewResponse 타입을 ExtracurricularResponse 타입으로 변환하여 모달에 전달
-        const activityData: ExtracurricularResponse = {
-            id: item.extracurricularId,
-            title: item.title,
-            // 필요한 다른 필드들...
-        };
+    if (item.star) return;
 
-        setSelectedActivity(activityData);
-        setIsModalOpen(true);
+    // [수정 포인트] 로그에 찍힌 대로 'id'를 사용해야 합니다.
+    // 만약 API 응답이 상황에 따라 extracurricularId를 줄 수도 있다면 
+    // 안전하게 둘 다 체크하도록 (item.id || item.extracurricularId) 로 작성합니다.
+    const targetId = item.id || item.extracurricularId; 
+
+    // 2. ID 유효성 검사
+    if (targetId === undefined || targetId === null) {
+        console.error("ID 추출 실패. 객체 키 확인 필요:", item);
+        toast.error("활동 ID를 찾을 수 없습니다.");
+        return;
+    }
+
+    const activityData: ExtracurricularResponse = {
+        id: targetId, // 추출한 ID 사용
+        title: item.title || "제목 없음",
+        // 필요한 경우 추가 필드 매핑
     };
+
+    setSelectedActivity(activityData);
+    setIsModalOpen(true);
+};
 
     const handleCreateReview = async (data: CreateReviewRequest) => {
         try {
