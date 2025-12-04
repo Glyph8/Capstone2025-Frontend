@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent, type ChangeEvent } from "react";
 import SelectItemButton from "../../components/SelectItemButton";
+import toast from "react-hot-toast";
 
 type InterestGridProps = {
     interests: string[]
@@ -32,7 +33,7 @@ const InterestGrid = ({ interests, setInterests }: InterestGridProps) => {
 
             if (!trimmedInput) return;
             if (categories.includes(trimmedInput)) {
-                alert("이미 존재하는 카테고리입니다."); 
+                toast.error("이미 존재하는 카테고리입니다."); 
                 setInputValue("");
                 return;
             }

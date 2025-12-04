@@ -226,11 +226,11 @@ const TimeTableGrid = () => {
           toast.success("이동 성공");
           loadTimeTable(); // 성공 시 테이블 다시 로드
         } else {
-          alert("시간표 이동에 실패했습니다.");
+          toast.error("시간표 이동에 실패했습니다.");
         }
       } catch (e) {
         console.error(e);
-        alert("시간표 이동 중 오류가 발생했습니다.");
+        toast.error("시간표 이동 중 오류가 발생했습니다.");
       }
     }
 

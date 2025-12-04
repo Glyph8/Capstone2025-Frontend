@@ -2,6 +2,7 @@
 
 import { setAlramSchedule } from '@/apis/calendar';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 // Props 타입 정의는 AlarmItemSwitch와 동일합니다.
 interface AlarmIconButtonProps {
@@ -48,8 +49,7 @@ export function AlarmIconButton({
       console.error('알림 상태 변경 실패! 롤백합니다.', error);
       setIsActive(!newIsAlarmState); // UI를 이전 상태로 강제 롤백
       
-      // (필수) 사용자에게 에러 알림 (e.g., 토스트 팝업)
-      alert('알림 설정 변경에 실패했습니다. 다시 시도해주세요.');
+      toast.error('알림 설정 변경에 실패했습니다. 다시 시도해주세요.');
 
     } finally {
       // 8. 성공/실패와 관계없이 로딩 상태 해제

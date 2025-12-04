@@ -3,6 +3,7 @@ import WideAcceptButton from "../../components/WideAcceptButton.tsx";
 import SetPassword from "./SetPassword.tsx";
 import { useState } from "react";
 import { sendMailRequest, verifyAuthCode } from "../../apis/auth.ts";
+import toast from "react-hot-toast";
 
 const SignupPage = () => {
     const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ const SignupPage = () => {
                 console.log("try 성공 result 실패")
         }
         catch {
-            alert("requestMAil 요청 실패")
+            toast.error("이메일 인증 요청 실패")
         }
     }
 
@@ -27,9 +28,7 @@ const SignupPage = () => {
         const codeResult = verifyAuthCode(email, code);
         console.log("api response", await codeResult)
         if (!await codeResult) {
-            // alert("인증번호가 일치하지 않습니다.\n테스트를 위해 강제 진행합니다.")
-            alert(`인증번호가 사용에 문제!  email : ${email} code : ${code}`)
-            console.error("인증 번호 불일치");
+           toast.error("인증 번호 불일치");
             // setIsVerifyed(true)
 
         }

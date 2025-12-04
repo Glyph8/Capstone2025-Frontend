@@ -6,6 +6,7 @@ import { enrollAcademicInfo } from "../../apis/auth";
 
 import { useNavigate } from "react-router-dom";
 import type { AcademicInfo } from "@/types/auth-types";
+import toast from "react-hot-toast";
 
 const SetAcademicInfoPage = () => {
     const navigate = useNavigate()
@@ -32,7 +33,7 @@ const SetAcademicInfoPage = () => {
                 console.log("try 성공, result false")
         }
         catch {
-            alert("compleSign 요청 에러 발생")
+            toast.error("학적 정보 저장 요청 에러 발생")
         }
     }
 

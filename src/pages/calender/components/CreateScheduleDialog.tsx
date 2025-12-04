@@ -129,15 +129,13 @@ export const CreateScheduleDialog = ({
       endDateTime: item.activityEnd ?? prev.endDateTime,
       extracurricularId: item.id ?? null,
     }));
-    // 선택 후 검색 결과 닫기 혹은 유지? 여기선 UX상 검색어 초기화가 깔끔
-    // setSearchQuery("");
-    alert(item.id);
+
   };
 
   // 제출 핸들러
   const handleSubmit = async () => {
     // 유효성 검사 (간단 예시)
-    if (!formData.title) return alert("제목을 입력해주세요.");
+    if (!formData.title) return toast.error("제목을 입력해주세요.");
 
     const payload = {
       title: formData.title,
@@ -145,8 +143,6 @@ export const CreateScheduleDialog = ({
       startDateTime: formData.startDateTime,
       endDateTime: formData.endDateTime,
     };
-
-    alert(payload);
 
     try {
       if (scheduleId === 0) {

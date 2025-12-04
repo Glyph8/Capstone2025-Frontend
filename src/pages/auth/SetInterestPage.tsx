@@ -3,6 +3,7 @@ import { enrollInterest } from "../../apis/auth";
 import WideAcceptButton from "../../components/WideAcceptButton";
 import InterestGrid from "./InterestGrid";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const SetInterestPage = () => {
     const [interests, setInterests] = useState<string[]>([])
@@ -16,11 +17,9 @@ const SetInterestPage = () => {
             const result = await enrollInterest(interests);
             if (result)
                 navigate('/auth/academic-info')
-            else
-                alert("try 요청 성공하였으나 result false")
 
         } catch {
-            console.log("흥미 입력 전송에 에러 발생")
+            toast.error("흥미 입력 전송에 에러 발생")
         }
 
     }

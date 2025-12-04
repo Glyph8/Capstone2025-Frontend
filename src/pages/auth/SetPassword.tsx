@@ -3,6 +3,7 @@ import TextInputForm from "../../components/TextInputForm.tsx";
 import WideAcceptButton from "../../components/WideAcceptButton.tsx";
 import { useState } from "react";
 import { enrollPW } from "../../apis/auth.ts";
+import toast from "react-hot-toast";
 
 const SetPassword = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const SetPassword = () => {
                 console.log("try 성공 result false");
         }
         catch {
-            alert("비밀번호 설정에 실패했습니다.")
+            toast.error("비밀번호 설정에 실패했습니다.")
 
         }
 

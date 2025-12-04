@@ -2,6 +2,7 @@ import TextInputForm from "../../components/TextInputForm.tsx";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginRequest } from "../../apis/auth.ts";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -12,11 +13,11 @@ const LoginPage = () => {
         // 에러 응답이 와도 main 진입하는 문제 해결 필요
         console.log("로그인 성공 res : ", res);
         if (res) navigate("/main/timetable");
-        else alert("로그인에서 문제 발생. 토큰 관련 오류 추정");
+        else toast.error("로그인에서 문제 발생. 토큰 관련 오류 추정");
       })
       .catch((err) =>
-        alert(
-          `login 실패 Error : ${err}. 입력 email : ${email} password : ${password}`
+        toast.error(
+          `login 실패 Error : ${err}`
         )
       );
   };

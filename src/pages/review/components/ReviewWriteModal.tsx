@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { CreateReviewRequest, ExtracurricularResponse } from "@/generated-api/Api";
 import { searchExtracurricular } from "@/apis/extracurricular"; // 경로 확인 필요
 import { X, Search, Check, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface ReviewWriteModalProps {
   isOpen: boolean;
@@ -64,8 +65,8 @@ export const ReviewWriteModal = ({ isOpen, onClose, onSubmit, initialData }: Rev
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
-    if (!selectedExtra) return alert("리뷰를 작성할 비교과 활동을 선택해주세요.");
-    if (!content.trim()) return alert("내용을 입력해주세요.");
+    if (!selectedExtra) return toast.error("리뷰를 작성할 비교과 활동을 선택해주세요.");
+    if (!content.trim()) return toast.error("내용을 입력해주세요.");
     
     const requestData: CreateReviewRequest = {
       extracurricularId: selectedExtra.id, // 선택된 비교과 ID 사용
