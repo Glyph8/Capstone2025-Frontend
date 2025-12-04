@@ -5,12 +5,21 @@ import {
   getExtraCurriApi,
   patchScheduleApi,
 } from "@/apis/calendar";
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import WideAcceptButton from "@/components/WideAcceptButton";
 import { useEffect, useState } from "react";
-import type { ChangeScheduleRequest, CreateScheduleRequest, ExtracurricularResponse } from "@/generated-api/Api";
+import type {
+  ChangeScheduleRequest,
+  CreateScheduleRequest,
+  ExtracurricularResponse,
+} from "@/generated-api/Api";
 import { formatKoreanDateTimeNative } from "@/utils/date";
-import { Trash, Search} from "lucide-react"; // 아이콘 활용
+import { Trash, Search } from "lucide-react"; // 아이콘 활용
 import { useDebounce } from "@/hooks/useDebounce"; // 위에서 만든 훅 import 가정
 import toast from "react-hot-toast";
 
@@ -27,19 +36,22 @@ export const CreateScheduleDialog = ({
   scheduleId,
   onSuccess,
 }: CreateScheduleDialogProps) => {
-  // 폼 상태 관리 (객체 하나로 관리하여 응집도 높임)
+  const [scheduleType, setScheduleType] = useState(
+    "NORMAL" as "NORMAL" | "EXTRACURRICULAR" | undefined
+  );
   const [formData, setFormData] = useState({
     title: "",
-    scheduleType: "NORMAL" as "NORMAL" | "EXTRACURRICULAR" | undefined,
     content: "",
     startDateTime: "",
     endDateTime: "",
-    extraCurriID: null as string | null, // 비교과 ID
+    extracurricularId: null as number | null, // 비교과 ID
   });
 
   // 비교과 검색 상태
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<ExtracurricularResponse[]>([]);
+  const [searchResults, setSearchResults] = useState<ExtracurricularResponse[]>(
+    []
+  );
   const [isSearching, setIsSearching] = useState(false); // 로딩 상태 UI용
 
   // 0.5초 디바운스 적용
@@ -62,12 +74,12 @@ export const CreateScheduleDialog = ({
         setIsSearching(false);
       }
     };
-    
+
     // 타입이 비교과일 때만 검색
-    if (formData.scheduleType === "EXTRACURRICULAR") {
+    if (scheduleType === "EXTRACURRICULAR") {
       search();
     }
-  }, [debouncedQuery, formData.scheduleType]);
+  }, [debouncedQuery, scheduleType]);
 
   // 2. 기존 데이터 로드 (상세 조회)
   useEffect(() => {
@@ -76,23 +88,25 @@ export const CreateScheduleDialog = ({
         if (data) {
           setFormData({
             title: data.title ?? "",
-            scheduleType: (data.scheduleType as "NORMAL" | "EXTRACURRICULAR") ?? "NORMAL",
             content: data.content ?? "",
             startDateTime: data.startDateTime ?? "",
             endDateTime: data.endDateTime ?? "",
-            extraCurriID: data.extracurricularField?.originTitle ?? null, // API 응답 구조에 맞게 조정 필요
+            extracurricularId: Number(
+              data.extracurricularField ?? null
+            ),
           });
+          setScheduleType("EXTRACURRICULAR")
         }
       });
     } else if (isOpen && scheduleId === 0) {
       // 생성 모드 초기화
+      setScheduleType("NORMAL");
       setFormData({
         title: "",
-        scheduleType: "NORMAL",
         content: "",
         startDateTime: "",
         endDateTime: "",
-        extraCurriID: null,
+        extracurricularId: null,
       });
       setSearchQuery("");
       setSearchResults([]);
@@ -113,10 +127,11 @@ export const CreateScheduleDialog = ({
       content: item.url ?? prev.content,
       startDateTime: item.activityStart ?? prev.startDateTime,
       endDateTime: item.activityEnd ?? prev.endDateTime,
-      extraCurriID: item.id?.toString() ?? null,
+      extracurricularId: item.id ?? null,
     }));
     // 선택 후 검색 결과 닫기 혹은 유지? 여기선 UX상 검색어 초기화가 깔끔
-    // setSearchQuery(""); 
+    // setSearchQuery("");
+    alert(item.id);
   };
 
   // 제출 핸들러
@@ -126,17 +141,24 @@ export const CreateScheduleDialog = ({
 
     const payload = {
       title: formData.title,
-      scheduleType: formData.scheduleType === "EXTRACURRICULAR" ? formData.extraCurriID : "NORMAL",
       content: formData.content,
       startDateTime: formData.startDateTime,
       endDateTime: formData.endDateTime,
     };
 
+    alert(payload);
+
     try {
       if (scheduleId === 0) {
-        await createScheduleApi(payload as CreateScheduleRequest); // API 타입에 맞게 조정
+        await createScheduleApi({
+          ...payload,
+          extracurricularId: scheduleId!,
+        } as CreateScheduleRequest); // API 타입에 맞게 조정
       } else {
-        await patchScheduleApi({ ...payload, scheduleId: scheduleId! } as ChangeScheduleRequest);
+        await patchScheduleApi({
+          ...payload,
+          extracurricularId: scheduleId!,
+        } as ChangeScheduleRequest);
       }
       onSuccess();
       setIsOpen(false);
@@ -147,21 +169,21 @@ export const CreateScheduleDialog = ({
   };
 
   const handleDelete = async () => {
-    if(!scheduleId) return;
-    if(confirm("정말로 이 일정을 삭제하시겠습니까?")) {
-        await deleteDetailScheduleApi(scheduleId);
-        onSuccess();
-        setIsOpen(false);
+    if (!scheduleId) return;
+    if (confirm("정말로 이 일정을 삭제하시겠습니까?")) {
+      await deleteDetailScheduleApi(scheduleId);
+      onSuccess();
+      setIsOpen(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="w-[90%] max-w-md p-6 bg-white rounded-xl shadow-lg max-h-[90vh] overflow-y-auto scrollbar-hide">
         <DialogTitle className="text-xl font-bold mb-4">
-            {scheduleId === 0 ? "새 일정 추가" : "일정 수정"}
+          {scheduleId === 0 ? "새 일정 추가" : "일정 수정"}
         </DialogTitle>
-        
+
         <div className="flex flex-col gap-5">
           {/* 1. 일정 타입 선택 (Radio Button UI 개선) */}
           <div className="flex bg-gray-100 p-1 rounded-lg">
@@ -169,11 +191,14 @@ export const CreateScheduleDialog = ({
               <button
                 key={type}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                  formData.scheduleType === type
+                  scheduleType === type
                     ? "bg-white text-[#01A862] shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
-                onClick={() => setFormData(prev => ({ ...prev, scheduleType: type }))}
+                onClick={() =>
+                   setScheduleType(type)
+                  // setFormData((prev) => ({ ...prev, scheduleType: type }))
+                }
               >
                 {type === "NORMAL" ? "일반 일정" : "비교과 활동"}
               </button>
@@ -181,7 +206,7 @@ export const CreateScheduleDialog = ({
           </div>
 
           {/* 2. 비교과 검색 영역 (타입이 비교과일 때만 노출) */}
-          {formData.scheduleType === "EXTRACURRICULAR" && (
+          {scheduleType === "EXTRACURRICULAR" && (
             <div className="relative animate-in fade-in slide-in-from-top-2">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -191,9 +216,11 @@ export const CreateScheduleDialog = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                {isSearching && <div className="absolute right-3 top-3 h-4 w-4 border-2 border-[#01A862] border-t-transparent rounded-full animate-spin"></div>}
+                {isSearching && (
+                  <div className="absolute right-3 top-3 h-4 w-4 border-2 border-[#01A862] border-t-transparent rounded-full animate-spin"></div>
+                )}
               </div>
-              
+
               {/* 검색 결과 리스트 */}
               {searchResults.length > 0 && (
                 <ul className="mt-2 max-h-48 overflow-y-auto bg-white border rounded-lg shadow-sm divide-y">
@@ -201,11 +228,18 @@ export const CreateScheduleDialog = ({
                     <li
                       key={item.id}
                       onClick={() => handleSelectExtraCurri(item)}
-                      className={`p-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-1 ${formData.extraCurriID === item.id?.toString() ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
+                      className={`p-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-1 ${
+                        formData.extracurricularId === item.id
+                          ? "bg-blue-50 border-l-4 border-blue-500"
+                          : ""
+                      }`}
                     >
-                      <span className="text-sm font-semibold text-gray-800 truncate">{item.title}</span>
+                      <span className="text-sm font-semibold text-gray-800 truncate">
+                        {item.title}
+                      </span>
                       <span className="text-xs text-gray-500">
-                        {formatKoreanDateTimeNative(item.activityStart)} ~ {formatKoreanDateTimeNative(item.activityEnd)}
+                        {formatKoreanDateTimeNative(item.activityStart)} ~{" "}
+                        {formatKoreanDateTimeNative(item.activityEnd)}
                       </span>
                     </li>
                   ))}
@@ -256,7 +290,9 @@ export const CreateScheduleDialog = ({
             <textarea
               name="content" // input 대신 textarea 사용으로 UX 개선
               value={formData.content}
-              onChange={(e) => setFormData(prev => ({...prev, content: e.target.value}))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, content: e.target.value }))
+              }
               rows={3}
               className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
               placeholder="상세 내용을 입력하세요"
@@ -265,20 +301,20 @@ export const CreateScheduleDialog = ({
         </div>
 
         <DialogFooter className="mt-6 flex flex-row gap-2 sm:justify-between">
-            {scheduleId !== 0 && (
-                 <button 
-                 onClick={handleDelete}
-                 className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                 aria-label="삭제"
-               >
-                 <Trash size={20} />
-               </button>
-            )}
+          {scheduleId !== 0 && (
+            <button
+              onClick={handleDelete}
+              className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              aria-label="삭제"
+            >
+              <Trash size={20} />
+            </button>
+          )}
           <div className="flex-1 flex justify-center items-center">
-             <WideAcceptButton
-                text={scheduleId === 0 ? "등록하기" : "수정하기"}
-                isClickable={true}
-                handleClick={handleSubmit}
+            <WideAcceptButton
+              text={scheduleId === 0 ? "등록하기" : "수정하기"}
+              isClickable={true}
+              handleClick={handleSubmit}
             />
           </div>
         </DialogFooter>

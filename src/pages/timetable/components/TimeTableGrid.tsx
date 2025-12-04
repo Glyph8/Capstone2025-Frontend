@@ -5,7 +5,7 @@ import {
   useLoadTableStore,
 } from "../../../store/store";
 
-import { deleteEvent, getTimeTable, patchEvent } from "../../../apis/timetable"; // patchEvent 추가
+import { getTimeTable, patchEvent } from "../../../apis/timetable";
 import type { dayString } from "@/types/timetable-types";
 import type {
   ChangeTimetableRequest,
@@ -20,7 +20,6 @@ import {
 import EditTableDrawer from "./EditTableDrawer";
 import toast from "react-hot-toast";
 
-// --- 헬퍼 상수 및 함수 ---
 const TIME_SLOTS = Array.from({ length: 31 }, (_, i) => {
   const hour = String(Math.floor(i / 2) + 9).padStart(2, "0");
   const minute = i % 2 === 0 ? "00" : "30";
@@ -34,15 +33,6 @@ const timeToGridRow = (time: LocalTime | undefined): number => {
   return (hour - 9) * 2 + (minute === 30 ? 1 : 0) + 1;
 };
 
-const formatToHourMinute = (timeString: string | undefined | null): string => {
-  if (!timeString) return "";
-  try {
-    const [hourStr, minuteStr] = timeString.split(":");
-    return `${parseInt(hourStr, 10)}:${minuteStr}`;
-  } catch (error) {
-    return "";
-  }
-};
 const formatHour = (time: string) => `${parseInt(time.substring(0, 2), 10)}시`;
 const hhmmStringToLocalTime = (timeString: string): LocalTime => {
   const hour = parseInt(timeString.substring(0, 2), 10);
@@ -50,7 +40,6 @@ const hhmmStringToLocalTime = (timeString: string): LocalTime => {
   return { hour, minute };
 };
 
-// 분 단위를 LocalTime 객체로 변환하는 헬퍼
 const minutesToLocalTime = (totalMinutes: number): LocalTime => {
   const hour = Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
@@ -58,7 +47,7 @@ const minutesToLocalTime = (totalMinutes: number): LocalTime => {
 };
 
 const TimeTableGrid = () => {
-  const [selectedEventId, setSelectedEventId] = useState<
+  const [selectedEventId] = useState<
     number | null | undefined
   >(null);
   const { setIsEditing } = useAddTimeTableStore();
@@ -69,7 +58,6 @@ const TimeTableGrid = () => {
   // --- 드래그 상태 관리 ---
   const [isDragging, setIsDragging] = useState(false);
 
-  // 드래그 모드: 'create'(빈칸 드래그) 또는 'move'(이벤트 이동)
   const [dragMode, setDragMode] = useState<"create" | "move" | null>(null);
 
   // 생성 모드용 상태
@@ -85,7 +73,7 @@ const TimeTableGrid = () => {
     day: dayString;
     index: number;
   } | null>(null); // 놓을 위치
-  const [eventDuration, setEventDuration] = useState<number>(0); // 이벤트 길이(분)
+  const [eventDuration, setEventDuration] = useState<number>(0); // 
 
   const dragEndIndexRef = useRef<number | null>(null);
 
@@ -100,9 +88,8 @@ const TimeTableGrid = () => {
 
   useEffect(() => {
     loadTimeTable();
-  }, [selectedCell]); // selectedCell 변경 시 갱신보다는, 저장 완료 후 호출됨
+  }, [selectedCell]); 
 
-  // --- 범위 선택 (Create Mode Logic) ---
   const selectRange = (
     day: dayString,
     startIndex: number,
@@ -123,11 +110,6 @@ const TimeTableGrid = () => {
     setCells(newCells);
   };
 
-  // --------------------------------------------------------
-  // 핸들러 통합 (Mouse & Touch)
-  // --------------------------------------------------------
-
-  // 1. [Create] 빈 셀에서 시작
   const handleCellStart = (day: dayString, timeIndex: number) => {
     setDragMode("create");
     setIsDragging(true);
@@ -137,14 +119,12 @@ const TimeTableGrid = () => {
     selectRange(day, timeIndex, timeIndex);
   };
 
-  // 2. [Move] 기존 이벤트에서 시작 (stopPropagation 중요)
   const handleEventDragStart = (
     e: React.MouseEvent | React.TouchEvent,
     event: LookupTimetableResponse
   ) => {
     e.stopPropagation(); // 빈 셀 클릭 이벤트 전파 방지
 
-    // 시간 계산: 현재 이벤트가 몇 분짜리인지?
     const startMin = timeToMinutes(
       parseFormattedTimeToLocalTime(event.startTime as string)
     );
@@ -158,13 +138,7 @@ const TimeTableGrid = () => {
     setMovingEvent(event);
     setEventDuration(duration);
 
-    // 초기 타겟 설정 (원래 있던 자리)
     if (event.day) {
-      // 원래 시작 시간의 인덱스 찾기
-      // const startIndex = TIME_SLOTS.findIndex((t) =>
-      //   t.startsWith(String(startMin / 60).padStart(2, "0"))
-      // );
-
       const parsedStartTime = parseFormattedTimeToLocalTime(
         event.startTime as string
       );
@@ -199,8 +173,9 @@ const TimeTableGrid = () => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-
+    
     const touch = e.touches[0];
+    
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
 
     if (element) {
@@ -259,7 +234,6 @@ const TimeTableGrid = () => {
       }
     }
 
-    // 상태 초기화
     setIsDragging(false);
     setDragMode(null);
     setDragStartInfo(null);
@@ -269,9 +243,7 @@ const TimeTableGrid = () => {
     dragEndIndexRef.current = null;
   };
 
-  // 기존 이벤트 클릭 (수정/삭제 모드)
   const handleEventClick = (event: LookupTimetableResponse) => {
-    // 드래그 후 클릭 이벤트가 발생할 수 있으므로 방어
     if (isDragging) return;
 
     setSelectedExistingEvent(event);
@@ -292,6 +264,8 @@ const TimeTableGrid = () => {
         onMouseUp={handleEnd}
         onMouseLeave={handleEnd}
         onTouchEnd={handleEnd}
+              onTouchMove={handleTouchMove}
+
         style={{
           gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
           gridTemplateRows: `repeat(${TIME_SLOTS.length}, 80px)`,
@@ -300,7 +274,7 @@ const TimeTableGrid = () => {
           touchAction: "none",
         }}
       >
-        {/* --- 1. 배경 그리드 --- */}
+        {/* --- 배경 그리드 --- */}
         {TIME_SLOTS.map((time, rowIndex) => {
           if (rowIndex === TIME_SLOTS.length - 1) return null;
 
@@ -313,7 +287,6 @@ const TimeTableGrid = () => {
               onMouseDown={() => handleCellStart(day as dayString, rowIndex)}
               onMouseEnter={() => handleMoveUpdate(day as dayString, rowIndex)}
               onTouchStart={() => handleCellStart(day as dayString, rowIndex)}
-              onTouchMove={handleTouchMove}
               style={{
                 backgroundColor: "#f5f5f5",
                 gridRow: rowIndex + 1,
@@ -324,7 +297,7 @@ const TimeTableGrid = () => {
           ));
         })}
 
-        {/* --- 2. 라벨 --- */}
+        {/* --- 라벨 --- */}
         {TIME_SLOTS.map((time, rowIndex) => {
           if (time.endsWith("00")) {
             return (
@@ -342,7 +315,6 @@ const TimeTableGrid = () => {
           return null;
         })}
 
-        {/* --- 3. 기존 이벤트 --- */}
         {loadTable.map((event) => {
           if (!event.day || !(event.day in DAY_TO_COL)) return null;
           const gridRowStart = timeToGridRow(
@@ -368,7 +340,7 @@ const TimeTableGrid = () => {
               }}
               className={`w-full overflow-hidden flex flex-col p-2 rounded-lg transition-all text-gray-800 
                 ${
-                  isMovingThis ? "opacity-30" : "hover:brightness-95"
+                  isMovingThis ? "opacity-50 pointer-events-none" : "hover:brightness-95"
                 } cursor-grab active:cursor-grabbing`}
               style={{
                 gridRow: `${gridRowStart} / ${gridRowEnd}`,
