@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import WideAcceptButton from "@/components/WideAcceptButton";
@@ -19,45 +20,53 @@ import type {
   ExtracurricularResponse,
 } from "@/generated-api/Api";
 import { formatKoreanDateTimeNative } from "@/utils/date";
-import { Trash, Search } from "lucide-react"; // 아이콘 활용
-import { useDebounce } from "@/hooks/useDebounce"; // 위에서 만든 훅 import 가정
+import { Trash, Search, CalendarClock } from "lucide-react";
+import { useDebounce } from "@/hooks/useDebounce";
 import toast from "react-hot-toast";
 
 interface CreateScheduleDialogProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   scheduleId?: number;
+  initialDate?: Date; // [NEW] 선택된 날짜를 받기 위한 prop 추가
   onSuccess: () => void;
 }
+
+// [NEW] Date 객체를 datetime-local input value 포맷(YYYY-MM-DDTHH:mm)으로 변환하는 헬퍼
+const toLocalISOString = (date: Date) => {
+  const offset = date.getTimezoneOffset() * 60000; // ms 단위 오프셋
+  const localDate = new Date(date.getTime() - offset);
+  return localDate.toISOString().slice(0, 16);
+};
 
 export const CreateScheduleDialog = ({
   isOpen,
   setIsOpen,
   scheduleId,
+  initialDate,
   onSuccess,
 }: CreateScheduleDialogProps) => {
-  const [scheduleType, setScheduleType] = useState(
-    "NORMAL" as "NORMAL" | "EXTRACURRICULAR" | undefined
-  );
+  const [scheduleType, setScheduleType] = useState<
+    "NORMAL" | "EXTRACURRICULAR" | undefined
+  >("NORMAL");
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     startDateTime: "",
     endDateTime: "",
-    extracurricularId: null as number | null, // 비교과 ID
+    extracurricularId: null as number | null,
   });
 
-  // 비교과 검색 상태
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ExtracurricularResponse[]>(
     []
   );
-  const [isSearching, setIsSearching] = useState(false); // 로딩 상태 UI용
+  const [isSearching, setIsSearching] = useState(false);
 
-  // 0.5초 디바운스 적용
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  // 1. 디바운스된 쿼리로 비교과 검색 자동 수행
+  // 검색 로직 (기존 유지)
   useEffect(() => {
     const search = async () => {
       if (!debouncedQuery.trim()) {
@@ -74,52 +83,60 @@ export const CreateScheduleDialog = ({
         setIsSearching(false);
       }
     };
-
-    // 타입이 비교과일 때만 검색
     if (scheduleType === "EXTRACURRICULAR") {
       search();
     }
   }, [debouncedQuery, scheduleType]);
 
-  // 2. 기존 데이터 로드 (상세 조회)
+  // 데이터 초기화 로직 (수정됨)
   useEffect(() => {
-    if (isOpen && scheduleId && scheduleId !== 0) {
-      getDetailScheduleApi(scheduleId).then((data) => {
-        if (data) {
-          setFormData({
-            title: data.title ?? "",
-            content: data.content ?? "",
-            startDateTime: data.startDateTime ?? "",
-            endDateTime: data.endDateTime ?? "",
-            extracurricularId: Number(
-              data.extracurricularField ?? null
-            ),
-          });
-          setScheduleType("EXTRACURRICULAR")
-        }
-      });
-    } else if (isOpen && scheduleId === 0) {
-      // 생성 모드 초기화
-      setScheduleType("NORMAL");
-      setFormData({
-        title: "",
-        content: "",
-        startDateTime: "",
-        endDateTime: "",
-        extracurricularId: null,
-      });
-      setSearchQuery("");
-      setSearchResults([]);
-    }
-  }, [isOpen, scheduleId]);
+    if (isOpen) {
+      if (scheduleId && scheduleId !== 0) {
+        // [수정 모드] 기존 데이터 불러오기
+        getDetailScheduleApi(scheduleId).then((data) => {
+          if (data) {
+            setFormData({
+              title: data.title ?? "",
+              content: data.content ?? "",
+              startDateTime: data.startDateTime ?? "",
+              endDateTime: data.endDateTime ?? "",
+              extracurricularId: Number(data.extracurricularField ?? null),
+            });
+            // 비교과 ID가 있으면 비교과 타입으로 설정
+            if (data.extracurricularField) setScheduleType("EXTRACURRICULAR");
+            else setScheduleType("NORMAL");
+          }
+        });
+      } else {
+        // [생성 모드] 초기화 및 선택된 날짜 자동 주입
+        setScheduleType("NORMAL");
+        
+        // [NEW] initialDate가 있으면 해당 날짜의 현재 시간으로 설정, 없으면 오늘 날짜
+        const baseDate = initialDate || new Date();
+        // 기본 시작 시간: 선택된 날짜의 현재 시간 (혹은 09:00 등 고정 가능)
+        // 기본 종료 시간: 시작 시간 + 1시간
+        const startDateStr = toLocalISOString(baseDate);
+        const endDateObj = new Date(baseDate.getTime() + 60 * 60 * 1000); // 1시간 뒤
+        const endDateStr = toLocalISOString(endDateObj);
 
-  // 입력 핸들러
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+          title: "",
+          content: "",
+          startDateTime: startDateStr,
+          endDateTime: endDateStr,
+          extracurricularId: null,
+        });
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    }
+  }, [isOpen, scheduleId, initialDate]); // initialDate 의존성 추가
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 비교과 아이템 선택 핸들러
   const handleSelectExtraCurri = (item: ExtracurricularResponse) => {
     setFormData((prev) => ({
       ...prev,
@@ -129,12 +146,11 @@ export const CreateScheduleDialog = ({
       endDateTime: item.activityEnd ?? prev.endDateTime,
       extracurricularId: item.id ?? null,
     }));
-
+    setSearchResults([]); // 선택 후 검색 결과 닫기 (UX 개선)
+    setSearchQuery(""); // 검색어 초기화
   };
 
-  // 제출 핸들러
   const handleSubmit = async () => {
-    // 유효성 검사 (간단 예시)
     if (!formData.title) return toast.error("제목을 입력해주세요.");
 
     const payload = {
@@ -148,12 +164,12 @@ export const CreateScheduleDialog = ({
       if (scheduleId === 0) {
         await createScheduleApi({
           ...payload,
-          extracurricularId: scheduleId!,
-        } as CreateScheduleRequest); // API 타입에 맞게 조정
+          extracurricularId: formData.extracurricularId, // 수정: 상태값 사용
+        } as CreateScheduleRequest);
       } else {
         await patchScheduleApi({
           ...payload,
-          extracurricularId: scheduleId!,
+          extracurricularId: formData.extracurricularId,
         } as ChangeScheduleRequest);
       }
       onSuccess();
@@ -175,68 +191,63 @@ export const CreateScheduleDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="w-[90%] max-w-md p-6 bg-white rounded-xl shadow-lg max-h-[90vh] overflow-y-auto scrollbar-hide">
-        <DialogTitle className="text-xl font-bold mb-4">
-          {scheduleId === 0 ? "새 일정 추가" : "일정 수정"}
-        </DialogTitle>
+      {/* [UI 개선] max-h를 줄이고, 내부 padding을 조절 */}
+      <DialogContent className="w-[90%] max-w-sm p-5 bg-white rounded-xl shadow-lg gap-4">
+        <DialogHeader>
+            <DialogTitle className="text-lg font-bold">
+            {scheduleId === 0 ? "새 일정 추가" : "일정 수정"}
+            </DialogTitle>
+        </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          {/* 1. 일정 타입 선택 (Radio Button UI 개선) */}
+        {/* [UI 개선] gap을 5 -> 3으로 축소하여 밀도 높임 */}
+        <div className="flex flex-col gap-3">
+          
+          {/* 1. 타입 선택 & 제목 입력 (공간 절약을 위해 상단 배치) */}
           <div className="flex bg-gray-100 p-1 rounded-lg">
             {(["NORMAL", "EXTRACURRICULAR"] as const).map((type) => (
               <button
                 key={type}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
                   scheduleType === type
                     ? "bg-white text-[#01A862] shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
-                onClick={() =>
-                   setScheduleType(type)
-                  // setFormData((prev) => ({ ...prev, scheduleType: type }))
-                }
+                onClick={() => setScheduleType(type)}
               >
                 {type === "NORMAL" ? "일반 일정" : "비교과 활동"}
               </button>
             ))}
           </div>
 
-          {/* 2. 비교과 검색 영역 (타입이 비교과일 때만 노출) */}
+          {/* 비교과 검색 (조건부 렌더링) */}
           {scheduleType === "EXTRACURRICULAR" && (
-            <div className="relative animate-in fade-in slide-in-from-top-2">
+            <div className="relative animate-in fade-in zoom-in-95 duration-200">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                {/* [UI 개선] 높이 h-9로 통일 */}
                 <input
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-[#01A862] focus:outline-none transition-all"
+                  className="w-full h-9 pl-9 pr-4 text-sm bg-gray-50 border rounded-lg focus:ring-1 focus:ring-[#01A862] focus:outline-none transition-all"
                   placeholder="비교과 활동 검색..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 {isSearching && (
-                  <div className="absolute right-3 top-3 h-4 w-4 border-2 border-[#01A862] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="absolute right-3 top-2.5 h-4 w-4 border-2 border-[#01A862] border-t-transparent rounded-full animate-spin"></div>
                 )}
               </div>
-
-              {/* 검색 결과 리스트 */}
+              {/* 검색 결과 */}
               {searchResults.length > 0 && (
-                <ul className="mt-2 max-h-48 overflow-y-auto bg-white border rounded-lg shadow-sm divide-y">
+                <ul className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto bg-white border rounded-lg shadow-md divide-y">
                   {searchResults.map((item) => (
                     <li
                       key={item.id}
                       onClick={() => handleSelectExtraCurri(item)}
-                      className={`p-3 cursor-pointer hover:bg-blue-50 transition-colors flex flex-col gap-1 ${
-                        formData.extracurricularId === item.id
-                          ? "bg-blue-50 border-l-4 border-blue-500"
-                          : ""
-                      }`}
+                      className="p-2.5 cursor-pointer hover:bg-blue-50 text-sm"
                     >
-                      <span className="text-sm font-semibold text-gray-800 truncate">
-                        {item.title}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatKoreanDateTimeNative(item.activityStart)} ~{" "}
-                        {formatKoreanDateTimeNative(item.activityEnd)}
-                      </span>
+                      <div className="font-medium truncate">{item.title}</div>
+                      <div className="text-xs text-gray-400">
+                         ~ {formatKoreanDateTimeNative(item.activityEnd)}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -244,71 +255,69 @@ export const CreateScheduleDialog = ({
             </div>
           )}
 
-          {/* 3. 제목 입력 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">제목</label>
+          {/* 2. 제목 */}
+          <div>
             <input
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="일정 제목을 입력하세요"
-              className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500"
+              placeholder="일정 제목"
+              className="w-full h-10 px-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 font-medium text-sm placeholder:text-gray-400"
             />
           </div>
 
-          {/* 4. 시간 입력 (Grid 레이아웃 활용) */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* 3. 시간 (아이콘과 함께 배치하여 인지 강화) */}
+          <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">시작</label>
+              <label className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                <CalendarClock size={12} /> 시작
+              </label>
               <input
                 type="datetime-local"
                 name="startDateTime"
                 value={formData.startDateTime}
                 onChange={handleChange}
-                className="w-full p-2 text-sm border border-gray-200 rounded-lg"
+                className="w-full p-2 h-9 text-xs border border-gray-200 rounded-lg focus:border-blue-500 outline-none"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">종료</label>
+              <label className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                <CalendarClock size={12} /> 종료
+              </label>
               <input
                 type="datetime-local"
                 name="endDateTime"
                 value={formData.endDateTime}
                 onChange={handleChange}
-                className="w-full p-2 text-sm border border-gray-200 rounded-lg"
+                className="w-full p-2 h-9 text-xs border border-gray-200 rounded-lg focus:border-blue-500 outline-none"
               />
             </div>
           </div>
 
-          {/* 5. 설명 입력 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">메모</label>
-            <textarea
-              name="content" // input 대신 textarea 사용으로 UX 개선
-              value={formData.content}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, content: e.target.value }))
-              }
-              rows={3}
-              className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none"
-              placeholder="상세 내용을 입력하세요"
-            />
-          </div>
+          {/* 4. 메모 (높이 줄임) */}
+          <textarea
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            rows={3}
+            className="w-full p-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 resize-none placeholder:text-gray-400"
+            placeholder="메모를 입력하세요"
+          />
         </div>
 
-        <DialogFooter className="mt-6 flex flex-row gap-2 sm:justify-between">
+        <DialogFooter className="mt-2 flex flex-row gap-2 items-center">
           {scheduleId !== 0 && (
             <button
               onClick={handleDelete}
-              className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
               aria-label="삭제"
             >
-              <Trash size={20} />
+              <Trash size={18} />
             </button>
           )}
-          <div className="flex-1 flex justify-center items-center">
+          <div className="flex-1">
             <WideAcceptButton
-              text={scheduleId === 0 ? "등록하기" : "수정하기"}
+              text={scheduleId === 0 ? "등록" : "수정"}
               isClickable={true}
               handleClick={handleSubmit}
             />

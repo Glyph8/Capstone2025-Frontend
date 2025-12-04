@@ -96,6 +96,7 @@ const MainCalendar = ({ data, setRequestYM, onScheduleChange }: MainCalendarProp
           isOpen={isOpenDialog}
           setIsOpen={setIsOpenDialog}
           scheduleId={selectedId}
+          initialDate={date} 
           onSuccess={onScheduleChange}
         />
       )}
