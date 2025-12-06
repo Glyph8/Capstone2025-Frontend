@@ -19,11 +19,11 @@ baseApi.instance.interceptors.response.use(
 
     (error) => {
         // 유효한 로그인 상태가 아닐 때
-        // if (error.response?.status === 401 || error.response?.status === 403) {
-        //     console.error("인증 에러! 로그인이 필요합니다.");
-        //     localStorage.removeItem("access_token");
-        //     window.location.href = "/auth/login";
-        // }
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            console.error("인증 에러! 로그인이 필요합니다.");
+            localStorage.removeItem("access_token");
+            window.location.href = "/auth/login";
+        }
         
         return Promise.reject(error);
     }

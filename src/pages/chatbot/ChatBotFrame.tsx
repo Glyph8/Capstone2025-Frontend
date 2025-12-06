@@ -7,28 +7,35 @@ import type { ContextType } from "@/types/chatbot-types.ts";
 import AnswerLoadingBubble from "./AnswerLoadingBubble.tsx";
 
 const ChatBotFrame = () => {
-  const { openChatBotPage } = useChatBotPageStore();
+  const { closeChatBotPage, pendingMessage, setPendingMessage } =
+    useChatBotPageStore();
   const [userQuestion, setUserQuestion] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const today = new Date();
   const [contexts, setContexts] = useState<ContextType[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [contexts]);
 
-  const handleUserQuestion = async () => {
-    const trimmed = userQuestion.trim();
+  const handleUserQuestion = async (manualText?: string) => {
+    // manualText가 있으면 그걸 쓰고, 없으면 state인 userQuestion을 씀
+    const textToSend =
+      typeof manualText === "string" ? manualText : userQuestion;
+    const trimmed = textToSend.trim();
+
     if (!trimmed) return;
 
+    // UI에 내 말풍선 추가
     const userContext: ContextType = { type: "user", message: trimmed };
-    const loadingContext: ContextType = { type: 'loading' };
+    const loadingContext: ContextType = { type: "loading" };
 
     setContexts((prev) => [...prev, userContext, loadingContext]);
-    setUserQuestion("");
+    setUserQuestion(""); // 입력창 초기화
 
     try {
       const botResponse = await sendUserQuestion(trimmed);
@@ -46,8 +53,9 @@ const ChatBotFrame = () => {
     } catch (error) {
       console.error("Failed to get bot response:", error);
       const errorContext: ContextType = {
-          type: 'bot',
-          answer: '죄송합니다, 답변을 가져오는 데 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        type: "bot",
+        answer:
+          "죄송합니다, 답변을 가져오는 데 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
       };
       setContexts((prev) => [...prev.slice(0, -1), errorContext]);
     }
@@ -55,24 +63,49 @@ const ChatBotFrame = () => {
     if (inputRef.current) inputRef.current.focus();
   };
 
-  useEffect(()=>{
-     console.log("챗봇 마운트?")
-    const process = async () =>{
-        const result = await registerUserToChatbot()
-        console.log("챗봇 마운트", result)
-    }
+  useEffect(() => {
+    console.log("챗봇 마운트?");
+    const process = async () => {
+      const result = await registerUserToChatbot();
+      console.log("챗봇 마운트", result);
+    };
     process();
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    if (pendingMessage) {
+      // 1) 입력창에 텍스트가 타이핑되는 효과를 원하면 setUserQuestion(pendingMessage)만 하고
+      // 2) 바로 전송되길 원하면 handleUserQuestion 호출
+
+      handleUserQuestion(pendingMessage); // 즉시 전송
+
+      setPendingMessage(null); // 메시지 처리했으니 스토어 초기화 (중복 전송 방지)
+    }
+  }, [pendingMessage]);
 
   return (
-<div
+    <div
       className="absolute bottom-0 w-full h-full
                  flex flex-col z-20 bg-[#DDE9F6]"
     >
       <div className="flex-shrink-0">
-        <div className="absolute top-5 right-5 cursor-pointer" onClick={openChatBotPage}>
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <div
+          className="absolute top-5 right-5 cursor-pointer"
+          onClick={closeChatBotPage}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </div>
         <div className="w-full flex flex-col justify-center items-center mt-12 mb-4">
@@ -122,11 +155,16 @@ const ChatBotFrame = () => {
           />
           <button
             className="flex-shrink-0 w-8 h-8 bg-[#0076FE] rounded-full shadow-[0px_4px_8px_3px_rgba(0,0,0,0.15)] inline-flex justify-center items-center overflow-hidden disabled:opacity-50"
-            onClick={handleUserQuestion}
+            onClick={()=>handleUserQuestion}
             disabled={!userQuestion.trim()}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5 text-white"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
             </svg>
           </button>
         </div>

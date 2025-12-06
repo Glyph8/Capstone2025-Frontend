@@ -20,9 +20,10 @@ import type {
   ExtracurricularResponse,
 } from "@/generated-api/Api";
 import { formatKoreanDateTimeNative } from "@/utils/date";
-import { Trash, Search, CalendarClock } from "lucide-react";
+import { Trash, Search, CalendarClock, MessageCircle } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import toast from "react-hot-toast";
+import { useChatBotPageStore } from "@/store/store";
 
 interface CreateScheduleDialogProps {
   isOpen: boolean;
@@ -32,7 +33,6 @@ interface CreateScheduleDialogProps {
   onSuccess: () => void;
 }
 
-// [NEW] Date 객체를 datetime-local input value 포맷(YYYY-MM-DDTHH:mm)으로 변환하는 헬퍼
 const toLocalISOString = (date: Date) => {
   const offset = date.getTimezoneOffset() * 60000; // ms 단위 오프셋
   const localDate = new Date(date.getTime() - offset);
@@ -65,6 +65,16 @@ export const CreateScheduleDialog = ({
   const [isSearching, setIsSearching] = useState(false);
 
   const debouncedQuery = useDebounce(searchQuery, 500);
+  const { openChatBotPage, setPendingMessage } = useChatBotPageStore();
+
+  const handleSendToChatbot = () => {
+    const message = `내 일정 중 "${
+      formData.title
+    }"에 대해 자세히 알려줘. \n(내용: ${formData.content || "없음"})`;
+    setPendingMessage(message);
+    openChatBotPage();
+    setIsOpen(false);
+  };
 
   // 검색 로직 (기존 유지)
   useEffect(() => {
@@ -88,11 +98,9 @@ export const CreateScheduleDialog = ({
     }
   }, [debouncedQuery, scheduleType]);
 
-  // 데이터 초기화 로직 (수정됨)
   useEffect(() => {
     if (isOpen) {
       if (scheduleId && scheduleId !== 0) {
-        // [수정 모드] 기존 데이터 불러오기
         getDetailScheduleApi(scheduleId).then((data) => {
           if (data) {
             setFormData({
@@ -102,19 +110,14 @@ export const CreateScheduleDialog = ({
               endDateTime: data.endDateTime ?? "",
               extracurricularId: Number(data.extracurricularField ?? null),
             });
-            // 비교과 ID가 있으면 비교과 타입으로 설정
             if (data.extracurricularField) setScheduleType("EXTRACURRICULAR");
             else setScheduleType("NORMAL");
           }
         });
       } else {
-        // [생성 모드] 초기화 및 선택된 날짜 자동 주입
         setScheduleType("NORMAL");
-        
-        // [NEW] initialDate가 있으면 해당 날짜의 현재 시간으로 설정, 없으면 오늘 날짜
+
         const baseDate = initialDate || new Date();
-        // 기본 시작 시간: 선택된 날짜의 현재 시간 (혹은 09:00 등 고정 가능)
-        // 기본 종료 시간: 시작 시간 + 1시간
         const startDateStr = toLocalISOString(baseDate);
         const endDateObj = new Date(baseDate.getTime() + 60 * 60 * 1000); // 1시간 뒤
         const endDateStr = toLocalISOString(endDateObj);
@@ -132,7 +135,9 @@ export const CreateScheduleDialog = ({
     }
   }, [isOpen, scheduleId, initialDate]); // initialDate 의존성 추가
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -191,18 +196,23 @@ export const CreateScheduleDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {/* [UI 개선] max-h를 줄이고, 내부 padding을 조절 */}
       <DialogContent className="w-[90%] max-w-sm p-5 bg-white rounded-xl shadow-lg gap-4">
         <DialogHeader>
-            <DialogTitle className="text-lg font-bold">
-            {scheduleId === 0 ? "새 일정 추가" : "일정 수정"}
-            </DialogTitle>
+          <DialogTitle className="flex items-center justify-between text-lg font-bold">
+            <button
+              onClick={handleSendToChatbot}
+              className="relative bottom-4 flex-1 p-2.5 text-[#0076FE] hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
+              title="이 일정을 챗봇에게 질문하기"
+              aria-label="챗봇 질문"
+            >
+              <MessageCircle size={20} />
+            </button>
+            <p className="flex-1 relative right-3">{scheduleId === 0 ? "새 일정 추가" : "일정 수정"}</p>
+            <p className="flex-1">{}</p>
+          </DialogTitle>
         </DialogHeader>
 
-        {/* [UI 개선] gap을 5 -> 3으로 축소하여 밀도 높임 */}
         <div className="flex flex-col gap-3">
-          
-          {/* 1. 타입 선택 & 제목 입력 (공간 절약을 위해 상단 배치) */}
           <div className="flex bg-gray-100 p-1 rounded-lg">
             {(["NORMAL", "EXTRACURRICULAR"] as const).map((type) => (
               <button
@@ -219,12 +229,10 @@ export const CreateScheduleDialog = ({
             ))}
           </div>
 
-          {/* 비교과 검색 (조건부 렌더링) */}
           {scheduleType === "EXTRACURRICULAR" && (
             <div className="relative animate-in fade-in zoom-in-95 duration-200">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                {/* [UI 개선] 높이 h-9로 통일 */}
                 <input
                   className="w-full h-9 pl-9 pr-4 text-sm bg-gray-50 border rounded-lg focus:ring-1 focus:ring-[#01A862] focus:outline-none transition-all"
                   placeholder="비교과 활동 검색..."
@@ -235,7 +243,6 @@ export const CreateScheduleDialog = ({
                   <div className="absolute right-3 top-2.5 h-4 w-4 border-2 border-[#01A862] border-t-transparent rounded-full animate-spin"></div>
                 )}
               </div>
-              {/* 검색 결과 */}
               {searchResults.length > 0 && (
                 <ul className="absolute z-10 w-full mt-1 max-h-40 overflow-y-auto bg-white border rounded-lg shadow-md divide-y">
                   {searchResults.map((item) => (
@@ -246,7 +253,7 @@ export const CreateScheduleDialog = ({
                     >
                       <div className="font-medium truncate">{item.title}</div>
                       <div className="text-xs text-gray-400">
-                         ~ {formatKoreanDateTimeNative(item.activityEnd)}
+                        ~ {formatKoreanDateTimeNative(item.activityEnd)}
                       </div>
                     </li>
                   ))}
@@ -255,7 +262,6 @@ export const CreateScheduleDialog = ({
             </div>
           )}
 
-          {/* 2. 제목 */}
           <div>
             <input
               name="title"
@@ -266,7 +272,6 @@ export const CreateScheduleDialog = ({
             />
           </div>
 
-          {/* 3. 시간 (아이콘과 함께 배치하여 인지 강화) */}
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-gray-500 flex items-center gap-1">
@@ -294,7 +299,6 @@ export const CreateScheduleDialog = ({
             </div>
           </div>
 
-          {/* 4. 메모 (높이 줄임) */}
           <textarea
             name="content"
             value={formData.content}
@@ -315,6 +319,7 @@ export const CreateScheduleDialog = ({
               <Trash size={18} />
             </button>
           )}
+
           <div className="flex-1">
             <WideAcceptButton
               text={scheduleId === 0 ? "등록" : "수정"}
