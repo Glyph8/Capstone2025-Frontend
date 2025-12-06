@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { getCalendarApi } from "@/apis/calendar";
 import { dummyCalender } from "./constants";
 import type { YearMonth } from "@/types/calendar-types";
-import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
+// import type { GetScheduleByYearAndMonthResponse } from "@/generated-api/Api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const CalenderPage = () => {
+  const queryClient = useQueryClient();
   const [dateText, setDateText] = useState("");
   useEffect(() => {
     const updateTime = () => {
@@ -24,51 +26,48 @@ const CalenderPage = () => {
       setDateText(formatted);
     };
 
-    updateTime(); // 최초 1회 실행
+    updateTime(); // 최초 1회만
     const timer = setInterval(updateTime, 1000); // 1초마다 갱신
 
     return () => clearInterval(timer);
   }, []);
 
-  const today = new Date();
-  const nowYear = today.getFullYear();
-  const nowMonth = today.getMonth() + 1;
-
+const today = new Date();
   const [requestYM, setRequestYM] = useState<YearMonth>({
-    year: nowYear,
-    month: nowMonth,
+    year: today.getFullYear(),
+    month: today.getMonth() + 1,
   });
 
-  const [data, setData] = useState<
-    GetScheduleByYearAndMonthResponse[] | undefined
-  >([]);
+  // 추후 필요시 refetch도 구조 분해 할당
+  const { data: calendarData } = useQuery({
+    queryKey: ['calendar', requestYM.year, requestYM.month], 
+    queryFn: async () => {
+      try {
+        const result = await getCalendarApi(requestYM.year, requestYM.month);
+        return result || []; 
+      } catch (error) {
+        console.error("캘린더 로드 실패", error);
+        return dummyCalender; 
+      }
+    },
+    staleTime: 1000 * 60 * 5, 
+  });
 
-  const fetchData = async () => {
-    try {
-      const result = await getCalendarApi(requestYM.year, requestYM.month);
-      console.log("달력 데이터 로드 : ", result);
-      setData(result);
-    } catch (error) {
-      console.error(error);
-      console.log("더미 데이터 로드");
-      setData(dummyCalender);
-    } finally {
-      console.log("CalendarPage api finally");
-    }
+  const handleScheduleChange = () => {
+    queryClient.invalidateQueries({ 
+      queryKey: ['calendar', requestYM.year, requestYM.month] 
+    });
+    // 또는 refetch() 호출
   };
-  useEffect(() => {
-    fetchData();
-  }, [requestYM.month, requestYM.year]);
 
   return (
     <div className="flex flex-col w-full h-full overflow-y-scroll no-scrollbar">
-      {/* 상단바 제거하는 스타일링 고려 */}
       <UpperNav text={dateText}></UpperNav>
       <main className="p-4">
         <MainCalendar
-          data={data}
+          data={calendarData} // Query로 가져온 데이터 주입
           setRequestYM={setRequestYM}
-          onScheduleChange={fetchData}
+          onScheduleChange={handleScheduleChange}
         />
       </main>
     </div>
